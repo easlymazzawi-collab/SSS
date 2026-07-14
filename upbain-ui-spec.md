@@ -346,52 +346,51 @@ Pill shape với dot animation + text:
 
 ### Header: "Cấu hình bot" + [Lưu cấu hình bot] PRIMARY
 
-### Grid module cards (2 cột):
+### Grid module cards (2 cột) — chỉ có 3 module:
+
+> **Lưu ý:** Chỉ có đúng 3 module trong grid. Force join và Self-delete KHÔNG nằm trong grid module này.
 
 **Module 1: Xem lại bài cũ (Archive)**
-- Header: icon archive + "Xem lại bài cũ" + Toggle ON/OFF
-- Body:
+- Header: icon archive + "Xem lại bài cũ" + mô tả: "Trả lại bài theo nguồn mapping khi user bấm 'Xem bài hôm nay' hoặc '/archiver'" + Toggle ON/OFF
+- Body (`.bot-module-options`):
   - Checkbox: "Trộn ads"
-  - Input number: "Tự xoá sau N phút" (0 = không xoá)
-  - Textarea: "Caption thông báo" (hỗ trợ placeholder `{time}`)
+  - **Auto-delete row** (compound): `[Checkbox "Tự động xoá sau"] [Input number nhỏ (1–1440)] [Text "phút"]` — 3 phần tử trên cùng 1 hàng ngang
+  - Textarea: "Caption thông báo (sau khi gửi nội dung xong)" (placeholder: `Nội dung sẽ hết hạn sau {time}`)
 
 **Module 2: File to link**
-- Header: icon link + "File to link" + Toggle ON/OFF
+- Header: icon link + "File to link" + mô tả: "Gom media user gửi thành 1 album, trả về 1 link tạm kèm mã xem" + Toggle ON/OFF
 - Body:
-  - Checkbox: "Protect content"
-  - Checkbox: "Cho phép forward"
-  - Input number: "Giới hạn xem" (0 = không giới hạn)
-  - Input number: "Tự xoá sau N phút" (0 = không xoá)
+  - Checkbox: "Trộn ads"
+  - **Auto-delete row** (compound): `[Checkbox "Tự động xoá sau"] [Input number nhỏ] [Text "phút"]`
   - Textarea: "Caption thông báo"
 
-**Module 3: Force join kênh**
-- Header: icon users + "Force join kênh" + Toggle ON/OFF
+**Module 3: Broadcast**
+- Header: icon megaphone + "Broadcast" + mô tả: "Admin stage media/text → bot gửi 1 lần đến user. Tự xoá sau N phút nếu có bật" + Toggle ON/OFF
 - Body:
-  - Input: "Kênh bắt buộc tham gia" (@username hoặc -100...)
-  - Textarea: "Tin nhắn khi chưa join"
+  - Checkbox: "Trộn ads"
+  - **Auto-delete row** (compound): `[Checkbox "Tự động xoá sau"] [Input number nhỏ] [Text "phút"]`
+  - Textarea: "Caption thông báo"
 
-**Module 4: Broadcast**
-- Header: icon zap + "Broadcast" + Toggle ON/OFF
-- Body:
-  - Input number: "Tốc độ gửi (msg/giây)" (1–30)
-  - Checkbox: "Chỉ gửi user Premium"
-
-**Module 5: Self-delete** (tự xóa bài sau khi xem)
-- Header: icon trash + "Tự xóa bài" + Toggle ON/OFF
-- Body:
-  - List các task self-delete: text | thời gian | [Sửa] [Xóa]
-  - Inline editor khi sửa: input text + [Lưu] [Hủy]
+**Auto-delete row component** (dùng chung cả 3 module):
+```
+[☐ Tự động xoá sau] [  30  ] phút
+```
+- Checkbox bật/tắt tính năng tự xóa
+- Input number inline nhỏ (class "mini-num", min=1, max=1440)
+- Label text "phút" sau input
+- Input chỉ active khi checkbox được check
 
 ---
 
 ## 12. Tab: Vận hành bot — Subtab: Kho bài đã up (Archive)
 
-### Header:
-- Tiêu đề
-- Input search
-- Date picker
-- Select filter branch (Tất cả / ads / noads)
-- [Làm mới] SECONDARY
+### Filter bar (4 cột):
+- Input search: "Tìm theo ngày hoặc tên nguồn" (placeholder: "VD: 2026-07-03, Vitamin, Keto...")
+- Date picker: "Từ ngày"
+- Date picker: "Đến ngày"
+- Select "Loại": Tất cả | Có ads | Không ads
+- Hint text kết quả search bên dưới filter bar
+- [Làm mới] trong header panel (không phải trong filter bar)
 
 ### Table archive:
 | Thumbnail | Caption/Tên | Bot | Thời gian | Nhánh | Actions |
@@ -514,7 +513,9 @@ Pill shape với dot animation + text:
 
 ### Progress bar (0–100%)
 
-### Terminal log (scrollable, monospace)
+### Card: "Log mô phỏng" (separate card dưới checklist):
+- Header text: "Log mô phỏng"
+- Log area (`antiflood-log`, aria-live="polite"): scrollable, monospace, colored by level
 
 ### Checklist chống flood (static list):
 - `flood_sleep_threshold = 86400` · Telethon auto-sleep [link docs]
@@ -533,11 +534,10 @@ Pill shape với dot animation + text:
 ### Bố cục 2 panel:
 
 **Panel trái — Cấu hình:**
-- Input: Forum Chat ID (-100...)
-- Input number: Root topic ID
+- Input: "Forum tổng admin" (-100... hoặc link forum)
+- Input **text** (không phải number): "Topic chung hệ thống" (placeholder "Tự tạo nếu chưa có") — hệ thống tự tạo topic nếu chưa có, nhập text làm tên
 - Toggle: "Tự tạo topic cho bot khi START"
 - Toggle: "Mời bot vào forum chung"
-- Toggle: "Auto pin link ngày mai"
 - [Lưu forum chung] PRIMARY
 
 **Panel phải — Trạng thái:**
@@ -745,38 +745,41 @@ Pill shape với dot animation + text:
 
 ### Header: "Backup & dữ liệu" + [Backup ngay] SECONDARY
 
-### Panel: Import dữ liệu cũ (5 cột):
+### Bố cục thực tế (4 panel theo thứ tự):
+
+**Panel 1 — Import dữ liệu cũ (5 cột):**
 - **Dropzone** (kéo thả):
-  - "Kéo file / ZIP vào đây"
-  - Định dạng hỗ trợ: .env, channels.json, folders.json, topic_map.txt, topic_rr.json, *.session, auto_config.json
+  - Text: "Kéo file/ZIP vào đây"
+  - Hint: định dạng hỗ trợ: `.env`, `channels.json`, `folders.json`, `topic_map.txt`, `topic_rr.json`, `*.session`, `auto_config.json`
   - Hover: highlight border + background
-- Toolbar: [Preview import] SUCCESS | [Import từ workspace] SECONDARY | [Resync disk] SECONDARY
+- Toolbar buttons (hàng ngang): [Preview import] SUCCESS | [Import từ workspace] SECONDARY | [Resync disk] SECONDARY
 
-### Panel: Lịch sử backup (7 cột):
-- Header + [Làm mới]
-- Table: Filename | Size | SHA256 (prefix) | Thời gian | Status | [⬇ Download]
+**Panel 2 — Lịch backup (7 cột):**
+- Toggle: "Backup theo giờ"
+- Input text: "Giờ backup" (multiple, vd: "02:30, 14:30" — nhập nhiều giờ cách bởi dấu phẩy)
+- Toggle: "Backup sau lịch up bài"
+- Select "Chế độ backup":
+  - `Chỉ backup data`
+  - `Backup toàn bộ tool`
+  - `Data + toàn bộ tool`
 
-### Panel: Lịch backup tự động (12 cột):
-- Toggle: "Backup sau khi chạy lịch up bài"
-- Input number: Giữ backup trong N ngày
-- Input readonly: Thư mục backup
-- [Lưu lịch backup] PRIMARY
+> **Lưu ý:** KHÔNG có "Lịch sử backup" dạng table trong tab này. Table backup history không có trong design gốc.
 
-### Panel: Audit log & Sandbox (12 cột):
-- Header + [Bắt đầu ghi] | [Replay] | [Export JSON] | [Xoá log] DANGER
+**Panel 3 — Audit log & activity (7 cột):**
+- Header: "Audit log & activity" + subtitle + [Xoá log] DANGER + [Thêm bot] PRIMARY
+- **Activity stream card** (card riêng bên trong panel):
+  - Header: "Activity stream" + badge count "X hành động" ở góc phải
+  - `<div id="auditChart">` — placeholder cho bar chart / stream visualization (cập nhật mỗi giây)
+- Audit table (bên dưới card):
+  | Thời gian | Action | Resource | Success |
 
-**Grid 3 cột:**
-- Input number: Tốc độ replay (ms/message)
-- Input readonly: Số tin đã ghi
-- Input readonly: Trạng thái (idle/recording/replaying)
-
-**Activity chart** (optional visualization):
-- Bar chart hoặc stream theo thời gian
-- Count badge: "X hành động"
-
-**Audit table:**
-| Thời gian | Actor | Action | Resource | Success |
-|----------|-------|--------|---------|---------|
+**Panel 4 — Sandbox · Replay phiên test (12 cột):**
+- Header: "Sandbox · Replay phiên test" + subtitle
+- Buttons: [⚫ Bắt đầu ghi] SECONDARY | [▶ Replay] SECONDARY | [⬇ Export JSON] SECONDARY | [🗑 Xoá session] DANGER
+- **Grid 3 cột:**
+  - Input number: "Tốc độ replay (ms / message)" (min=20, max=2000, default=200)
+  - Input readonly: "Số tin nhắn đã ghi" (default="0")
+  - Input readonly: "Trạng thái" (default="idle")
 
 ---
 
