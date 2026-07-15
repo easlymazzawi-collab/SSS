@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-wheel-metadata/
+
+# Environments
+.env
+.venv
+venv/
+env/
+
+# Data (never commit)
+tool/data/
+data/
+
+# Session files (never commit)
+*.session
+*.session-journal
+
+# Frontend build
+tool/frontend/dist/
+tool/frontend/node_modules/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Temporary
+/tmp/

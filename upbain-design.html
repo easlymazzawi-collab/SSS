@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UpBain Control</title>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--panel-soft:#1c2128;--panel-elevated:#21262d;--ink:#e6edf3;--text:#c9d1d9;--muted:#8b949e;--line:#30363d;--line-soft:#21262d;--nav:#0a0e14;--nav-soft:#161b22;--blue:#58a6ff;--blue-dark:#388bfd;--blue-soft:rgba(56,139,253,.16);--green:#3fb950;--green-soft:rgba(63,185,80,.16);--amber:#d29922;--amber-soft:rgba(210,153,34,.16);--red:#f85149;--red-soft:rgba(248,81,73,.16);--purple:#a371f7;--purple-soft:rgba(163,113,247,.16);--cyan:#2dd4bf;--cyan-soft:rgba(45,212,191,.16);--shadow:0 10px 26px rgba(0,0,0,.45);--radius:8px;--gap:16px;--gap-sm:10px}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;color-scheme:dark;height:100%}
+body{min-height:100vh;background:linear-gradient(180deg,var(--nav) 0,var(--bg) 240px,var(--nav) 100%);color:var(--ink);font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+::selection{background:rgba(88,166,255,.35);color:#fff}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:#0a0e14}
+::-webkit-scrollbar-thumb{background:#30363d;border-radius:999px;border:2px solid #0a0e14}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
+.icon{width:16px;height:16px;stroke-width:2;flex:0 0 auto;stroke:currentColor;display:inline-block;vertical-align:middle}
+
+/* ── LOGIN ── */
+.login-shell{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 18% 22%,rgba(45,212,191,.18),transparent 28%),radial-gradient(circle at 84% 12%,rgba(88,166,255,.18),transparent 30%),rgba(8,11,16,.92);backdrop-filter:blur(14px)}
+.login-shell[hidden]{display:none}
+.login-card{width:min(420px,100%);display:grid;gap:16px;padding:24px;border:1px solid var(--line);border-radius:12px;background:rgba(22,27,34,.97);box-shadow:0 24px 70px rgba(0,0,0,.6);animation:fadeUp 220ms ease both}
+.login-head{display:flex;align-items:center;gap:12px}
+.login-mark{width:44px;height:44px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,var(--cyan),var(--blue-dark));color:#0a0e14;font-weight:900;font-size:20px;box-shadow:0 12px 22px rgba(56,139,253,.35)}
+.login-title h2{font-size:20px}
+.login-title p{margin-top:3px;color:var(--muted);font-size:13px}
+
+/* ── APP LAYOUT ── */
+.app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;background:var(--nav);border-right:1px solid var(--line);z-index:20;overflow:hidden}
+.brand{display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid var(--line);flex-shrink:0}
+.brand-mark{width:32px;height:32px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(135deg,var(--cyan),var(--blue-dark));color:#0a0e14;font-weight:900;font-size:15px;flex-shrink:0}
+.brand-name{font-weight:700;font-size:15px;letter-spacing:.3px}
+.brand-name span{font-weight:400;font-size:12px;color:var(--muted);display:block}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 0}
+.nav-label{padding:10px 14px 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+.nav-link{display:flex;align-items:center;gap:9px;padding:8px 14px;color:var(--muted);border:none;background:none;width:100%;text-align:left;cursor:pointer;border-radius:0;font-size:13px;transition:color .15s,background .15s;position:relative}
+.nav-link:hover{color:var(--ink);background:rgba(255,255,255,.04)}
+.nav-link.active{color:var(--blue);background:var(--blue-soft)}
+.nav-link.active::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:0 3px 3px 0;background:var(--blue)}
+.nav-count{margin-left:auto;background:var(--blue-soft);color:var(--blue);border-radius:10px;font-size:11px;font-weight:700;padding:1px 7px;min-width:20px;text-align:center}
+.nav-sublist{padding:2px 0 4px 28px;display:none}
+.nav-sublist.open{display:block}
+.nav-sublink{display:block;padding:5px 10px;color:var(--muted);border:none;background:none;width:100%;text-align:left;cursor:pointer;font-size:12px;border-radius:5px;transition:color .12s,background .12s}
+.nav-sublink:hover{color:var(--ink);background:rgba(255,255,255,.05)}
+.nav-sublink.active{color:var(--blue)}
+.sidebar-tools{padding:10px;border-top:1px solid var(--line);flex-shrink:0}
+.palette-btn{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:none;color:var(--muted);width:100%;font-size:12px;transition:all .15s}
+.palette-btn:hover{color:var(--ink);border-color:var(--blue);background:var(--blue-soft)}
+.palette-btn kbd{margin-left:auto;font-size:11px;border:1px solid var(--line);border-radius:3px;padding:1px 5px;color:var(--muted)}
+.account{display:flex;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid var(--line);flex-shrink:0}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue-dark));display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.account strong{font-size:13px;display:block}
+.account span{font-size:11px;color:var(--muted);display:block}
+
+/* ── MAIN ── */
+.main{display:flex;flex-direction:column;min-height:100vh;overflow:hidden}
+.topbar{display:flex;align-items:center;gap:12px;padding:0 24px;height:56px;border-bottom:1px solid var(--line);background:rgba(10,14,20,.92);backdrop-filter:blur(8px);position:sticky;top:0;z-index:10;flex-shrink:0}
+.topbar h1{font-size:15px;font-weight:700;white-space:nowrap}
+.topbar-sub{font-size:12px;color:var(--muted);margin-left:4px;display:none}
+.topbar-spacer{flex:1}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--green);background:var(--green-soft);border:1px solid rgba(63,185,80,.3);border-radius:20px;padding:3px 10px}
+.live.warn{color:var(--amber);background:var(--amber-soft);border-color:rgba(210,153,34,.3)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.content{flex:1;overflow-y:auto;padding:24px}
+.section{display:none;animation:fadeUp .18s ease both}
+.section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── GRID ── */
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap)}
+.span-2{grid-column:span 2}
+.span-3{grid-column:span 3}
+.span-4{grid-column:span 4}
+.span-5{grid-column:span 5}
+.span-6{grid-column:span 6}
+.span-7{grid-column:span 7}
+.span-8{grid-column:span 8}
+.span-9{grid-column:span 9}
+.span-10{grid-column:span 10}
+.span-12{grid-column:span 12}
+@media(max-width:900px){[class*="span-"]{grid-column:span 12}}
+
+/* ── STAT CARD ── */
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:4px}
+.stat-head{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px}
+.stat-icon{width:24px;height:24px;border-radius:6px;background:var(--blue-soft);color:var(--blue);display:grid;place-items:center;font-size:11px;font-weight:700}
+.stat strong{font-size:24px;font-weight:700;line-height:1}
+.stat small{font-size:12px;color:var(--muted)}
+
+/* ── PANEL ── */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.panel-head{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:10px}
+.panel-title h3{font-size:14px;font-weight:600;margin:0}
+.panel-title span{font-size:12px;color:var(--muted);display:block;margin-top:2px}
+.panel-actions{display:flex;gap:8px;margin-left:auto;flex-shrink:0}
+.panel-body{padding:18px}
+.panel-search{padding:12px 18px;border-bottom:1px solid var(--line)}
+
+/* ── SECTION HEAD ── */
+.section-head{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.section-title h2{font-size:18px;font-weight:700}
+.section-title p{font-size:13px;color:var(--muted);margin-top:3px}
+.toolbar{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap;align-items:center}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{background:var(--blue-dark);color:#fff;border-color:var(--blue-dark)}
+.btn-primary:hover:not(:disabled){background:var(--blue);border-color:var(--blue)}
+.btn-success{background:var(--green-soft);color:var(--green);border-color:rgba(63,185,80,.35)}
+.btn-success:hover:not(:disabled){background:var(--green);color:#000}
+.btn-danger{background:var(--red-soft);color:var(--red);border-color:rgba(248,81,73,.3)}
+.btn-danger:hover:not(:disabled){background:var(--red);color:#fff}
+.btn-warning{background:var(--amber-soft);color:var(--amber);border-color:rgba(210,153,34,.3)}
+.btn-warning:hover:not(:disabled){background:var(--amber);color:#000}
+.btn-secondary{background:var(--panel-elevated);color:var(--text);border-color:var(--line)}
+.btn-secondary:hover:not(:disabled){border-color:var(--blue);color:var(--ink)}
+.btn-ghost{background:none;color:var(--muted);border-color:transparent}
+.btn-ghost:hover:not(:disabled){color:var(--ink);background:rgba(255,255,255,.06)}
+.btn-mini{padding:4px 10px;font-size:12px}
+.btn-block{width:100%;justify-content:center}
+.btn-icon{background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;border-radius:5px;display:inline-flex;align-items:center;transition:color .15s}
+.btn-icon:hover{color:var(--ink)}
+
+/* ── FORMS ── */
+.field{display:flex;flex-direction:column;gap:5px}
+.field label,.form-row label{font-size:12px;font-weight:600;color:var(--muted)}
+.input,.select{background:var(--panel-elevated);border:1px solid var(--line);border-radius:6px;color:var(--ink);padding:8px 11px;font-size:13px;transition:border-color .15s;width:100%}
+.input:focus,.select:focus{outline:none;border-color:var(--blue)}
+.input::placeholder{color:var(--muted)}
+.select{cursor:pointer}
+.hint{font-size:11px;color:var(--muted)}
+.card{background:var(--panel-soft);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.form-stack{display:flex;flex-direction:column;gap:14px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.form-row{display:flex;flex-direction:column;gap:5px}
+
+/* ── TOGGLE ── */
+.toggle{position:relative;display:inline-block;width:38px;height:21px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:var(--line);border-radius:21px;cursor:pointer;transition:.2s}
+.slider::before{content:'';position:absolute;width:15px;height:15px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle input:checked+.slider{background:var(--blue-dark)}
+.toggle input:checked+.slider::before{transform:translateX(17px)}
+.switch-line{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{padding:9px 14px;text-align:left;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--line)}
+.tbl td{padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr:hover td{background:rgba(255,255,255,.03)}
+
+/* ── TAGS ── */
+.tag{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.tag-blue{background:var(--blue-soft);color:var(--blue)}
+.tag-green{background:var(--green-soft);color:var(--green)}
+.tag-red{background:var(--red-soft);color:var(--red)}
+.tag-amber{background:var(--amber-soft);color:var(--amber)}
+.tag-muted{background:rgba(139,148,158,.12);color:var(--muted)}
+.tag-purple{background:var(--purple-soft);color:var(--purple)}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid transparent}
+.badge.ready{background:var(--green-soft);color:var(--green);border-color:rgba(63,185,80,.3)}
+.badge.warn{background:var(--amber-soft);color:var(--amber)}
+.badge.off{background:rgba(139,148,158,.1);color:var(--muted)}
+
+/* ── RUN NOTE ── */
+.run-note{display:flex;gap:12px;background:var(--blue-soft);border:1px solid rgba(88,166,255,.2);border-radius:8px;padding:12px;font-size:13px}
+.run-note strong{color:var(--blue);font-weight:700;white-space:nowrap;display:block;margin-bottom:2px}
+.run-note span{color:var(--text)}
+
+/* ── TERMINAL ── */
+.terminal{background:#070b10;border-radius:8px;overflow:hidden}
+.terminal-bar{display:flex;gap:7px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.05)}
+.terminal-dot{width:12px;height:12px;border-radius:50%;background:#30363d}
+.terminal-dot:nth-child(1){background:#ff5f57}
+.terminal-dot:nth-child(2){background:#febc2e}
+.terminal-dot:nth-child(3){background:#28c840}
+.terminal-log{padding:14px;font-family:monospace;font-size:12px;line-height:1.7;min-height:180px;max-height:320px;overflow-y:auto;color:var(--text)}
+.log-line{display:flex;gap:10px}
+.log-line .ts{color:var(--muted);flex-shrink:0}
+.log-line.info .msg{color:var(--text)}
+.log-line.ok .msg{color:var(--green)}
+.log-line.warn .msg{color:var(--amber)}
+.log-line.err .msg{color:var(--red)}
+
+/* ── PROGRESS ── */
+.progress{height:5px;background:var(--line);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;background:var(--blue);transition:width .3s}
+
+/* ── MODAL ── */
+.modal{display:none;position:fixed;inset:0;z-index:100;align-items:center;justify-content:center}
+.modal.open{display:flex}
+.modal__backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6);cursor:pointer}
+.modal__panel{position:relative;z-index:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(520px,94vw);max-height:88vh;overflow-y:auto;box-shadow:var(--shadow)}
+.modal__head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)}
+.modal__head h3{font-size:15px;font-weight:700}
+.modal__body{padding:20px;display:grid;gap:14px}
+.modal__actions{display:flex;justify-content:flex-end;gap:8px;padding-top:8px}
+
+/* ── TOAST ── */
+.toast-box{position:fixed;bottom:20px;right:20px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast-item{display:flex;align-items:center;gap:10px;padding:11px 16px;background:var(--panel-elevated);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);min-width:280px;max-width:380px;animation:fadeUp .2s ease;pointer-events:all;font-size:13px}
+.toast-item.ok{border-color:rgba(63,185,80,.4)}
+.toast-item.err{border-color:rgba(248,81,73,.4)}
+.toast-msg{flex:1}
+.toast-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:0 2px}
+
+/* ── SUBPAGE PANEL ── */
+.subpage-panel{display:none}
+.subpage-panel.active{display:block}
+
+/* ── DROPZONE ── */
+.dropzone{border:2px dashed var(--line);border-radius:8px;padding:32px;text-align:center;color:var(--muted);transition:border-color .2s,background .2s}
+.dropzone:hover{border-color:var(--blue);background:var(--blue-soft)}
+.dropzone strong{display:block;margin-bottom:6px;color:var(--ink)}
+
+/* ── MAPPING CARD ── */
+.mapping-card{border:1px solid var(--line);border-radius:8px;background:var(--panel-soft);overflow:hidden;margin-bottom:10px}
+.mapping-card-head{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none}
+.mapping-card-head:hover{background:rgba(255,255,255,.03)}
+.mapping-card-body{padding:14px 16px;border-top:1px solid var(--line);display:none}
+.mapping-card.open .mapping-card-body{display:block}
+.mapping-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+
+/* ── FLOW BOARD ── */
+.flow-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--panel-soft);border:1px solid var(--line);border-radius:7px;margin-bottom:8px;cursor:grab}
+.flow-item:hover{border-color:var(--blue)}
+.flow-handle{color:var(--muted);flex-shrink:0}
+.flow-label{flex:1;font-weight:600}
+.flow-meta{font-size:12px;color:var(--muted)}
+
+/* ── CHANNEL PICKER ── */
+.channel-picker{display:flex;flex-direction:column;gap:5px;max-height:240px;overflow-y:auto}
+.ch-pick{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;background:var(--panel-soft);border:1px solid var(--line)}
+.ch-pick label{display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;font-size:13px}
+
+/* ── LOGGED-IN CARD ── */
+.logged-in-card{display:flex;align-items:center;gap:14px;padding:14px;background:var(--green-soft);border:1px solid rgba(63,185,80,.25);border-radius:8px}
+.logged-in-avatar{width:40px;height:40px;border-radius:50%;background:var(--green);display:grid;place-items:center;color:#000;flex-shrink:0}
+.logged-in-name{font-weight:700;font-size:14px}
+.logged-in-meta{font-size:12px;color:var(--muted)}
+.logged-in-actions{display:flex;gap:8px;margin-left:auto;flex-shrink:0}
+
+/* ── MODE TAGS ── */
+.mode-tags{display:flex;flex-wrap:wrap;gap:6px}
+.mode-tag{display:flex;align-items:center;gap:5px;padding:5px 10px;border:1px solid var(--line);border-radius:6px;cursor:pointer;font-size:12px;transition:all .15s}
+.mode-tag:hover{border-color:var(--blue)}
+.mode-tag input[type=radio]{display:none}
+.mode-tag:has(input:checked){background:var(--blue-soft);border-color:var(--blue);color:var(--blue);font-weight:600}
+
+/* ── BOT MODULE CARD ── */
+.bot-module-options{display:flex;flex-direction:column;gap:10px;padding:10px 0 4px}
+.check{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;color:var(--text)}
+.check input{accent-color:var(--blue);width:15px;height:15px;cursor:pointer}
+
+/* ── ANTIFLOOD ── */
+.af-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.af-stat{background:var(--panel-soft);border:1px solid var(--line);border-radius:8px;padding:12px;text-align:center}
+.af-stat strong{display:block;font-size:22px;font-weight:700;margin-bottom:2px}
+.af-stat span{font-size:11px;color:var(--muted)}
+
+/* ── SCHEDULE FLOW ── */
+.flow-board{padding:4px 0}
+.flow-list{display:flex;flex-direction:column;gap:8px}
+
+/* MISC */
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-state .icon-big{font-size:36px;margin-bottom:12px}
+.empty-state h4{font-size:14px;font-weight:600;margin-bottom:4px;color:var(--text)}
+.topic-form{padding:16px;border-top:1px solid var(--line);background:var(--panel-soft)}
+.topic-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.dest-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:8px}
+.dest-row .input{flex:1}
+</style>
+</head>
+<body>
+
+<!-- ──── LOGIN ──── -->
+<div class="login-shell" id="loginShell">
+  <div class="login-card">
+    <div class="login-head">
+      <div class="login-mark">U</div>
+      <div class="login-title">
+        <h2>UpBain Control</h2>
+        <p>Đăng nhập để quản trị hệ thống</p>
+      </div>
+    </div>
+    <div class="login-form">
+      <div class="field">
+        <label>Tên đăng nhập</label>
+        <input class="input" id="loginUser" type="text" placeholder="admin" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Mật khẩu</label>
+        <input class="input" id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary" id="loginBtn" style="margin-top:4px" onclick="doLogin()">Đăng nhập</button>
+    </div>
+  </div>
+</div>
+
+<!-- ──── APP ──── -->
+<div class="app" id="appShell" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">U</div>
+      <div class="brand-name">UpBain<span>Control v1.0</span></div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <button class="nav-link active" data-tab="dashboard">
+        <i data-lucide="layout-dashboard" class="icon"></i> Điều khiển
+      </button>
+      <button class="nav-link" data-tab="topics">
+        <i data-lucide="megaphone" class="icon"></i> Up bài ads
+        <span class="nav-count" id="nc-topics">0</span>
+      </button>
+      <button class="nav-link" data-tab="alltask">
+        <i data-lucide="badge-percent" class="icon"></i> Ads cuối
+      </button>
+      <button class="nav-link" data-tab="botops" data-has-sub="botops-sub">
+        <i data-lucide="workflow" class="icon"></i> Vận hành bot
+      </button>
+      <div class="nav-sublist" id="botops-sub">
+        <button class="nav-sublink active" data-subpage="botops-users">User của bot</button>
+        <button class="nav-sublink" data-subpage="botops-modules">Cấu hình bot</button>
+        <button class="nav-sublink" data-subpage="botops-archive">Kho bài đã up</button>
+        <button class="nav-sublink" data-subpage="botops-filelink">File to link</button>
+        <button class="nav-sublink" data-subpage="botops-shares">Kho link share</button>
+        <button class="nav-sublink" data-subpage="botops-viewcodes">Mã xem</button>
+        <button class="nav-sublink" data-subpage="botops-antiflood">Anti-flood</button>
+      </div>
+      <button class="nav-link" data-tab="botadmin" data-has-sub="botadmin-sub">
+        <i data-lucide="shield" class="icon"></i> Admin bot
+      </button>
+      <div class="nav-sublist" id="botadmin-sub">
+        <button class="nav-sublink active" data-subpage="botadmin-forum">Forum chung admin</button>
+        <button class="nav-sublink" data-subpage="botadmin-topics">Topic từng bot</button>
+        <button class="nav-sublink" data-subpage="botadmin-progress">Tiến độ up</button>
+        <button class="nav-sublink" data-subpage="botadmin-invite">Mời bot vào forum</button>
+        <button class="nav-sublink" data-subpage="botadmin-logs">Log hệ thống</button>
+      </div>
+      <button class="nav-link" data-tab="channels">
+        <i data-lucide="radio-tower" class="icon"></i> Kênh & folder
+        <span class="nav-count" id="nc-channels">0</span>
+      </button>
+      <div class="nav-label">Hệ thống</div>
+      <button class="nav-link" data-tab="schedule">
+        <i data-lucide="calendar-clock" class="icon"></i> Lịch auto
+      </button>
+      <button class="nav-link" data-tab="telegram">
+        <i data-lucide="user-cog" class="icon"></i> Admin userbot
+      </button>
+      <button class="nav-link" data-tab="import">
+        <i data-lucide="database" class="icon"></i> Backup & dữ liệu
+      </button>
+      <button class="nav-link" data-tab="logs">
+        <i data-lucide="terminal" class="icon"></i> Log realtime
+      </button>
+    </nav>
+    <div class="sidebar-tools">
+      <button class="palette-btn">
+        <i data-lucide="command" class="icon"></i> Tìm nhanh
+        <kbd>Ctrl K</kbd>
+      </button>
+    </div>
+    <div class="account">
+      <div class="avatar">AD</div>
+      <div>
+        <strong>Admin</strong>
+        <span>Local dashboard</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <h1>UpBain Web Dashboard</h1>
+      <div class="topbar-spacer"></div>
+      <button class="btn btn-secondary btn-mini"><i data-lucide="refresh-cw" class="icon"></i>Thử lại</button>
+      <span class="live warn" id="topbarStatus"><span class="dot"></span><span id="topbarLabel">Chưa kết nối</span></span>
+      <button class="btn btn-success" id="startBtn" onclick="doStart()"><i data-lucide="play" class="icon"></i>START</button>
+      <button class="btn btn-danger" id="stopBtn" onclick="doStop()"><i data-lucide="square" class="icon"></i>STOP</button>
+    </header>
+
+    <div class="content">
+
+      <!-- ══════════════ DASHBOARD ══════════════ -->
+      <section class="section active" id="sec-dashboard">
+        <div class="section-head">
+          <div class="section-title">
+            <h2>Điều khiển</h2>
+            <p>Trạng thái userbot, auto runner, kho topic và các lệnh chạy nhanh.</p>
+          </div>
+        </div>
+        <div class="grid" style="margin-bottom:16px">
+          <div class="stat span-3">
+            <div class="stat-head">Userbot<span class="stat-icon"><i data-lucide="user-check" class="icon"></i></span></div>
+            <strong id="st-bot" style="color:var(--amber)">Offline</strong>
+            <small>Chưa đăng nhập</small>
+          </div>
+          <div class="stat span-3">
+            <div class="stat-head">Auto<span class="stat-icon"><i data-lucide="timer-reset" class="icon"></i></span></div>
+            <strong id="st-auto" style="color:var(--muted)">Stopped</strong>
+            <small>Bấm START để bật</small>
+          </div>
+          <div class="stat span-3">
+            <div class="stat-head">Mapping<span class="stat-icon"><i data-lucide="folder-tree" class="icon"></i></span></div>
+            <strong id="st-topics">0</strong>
+            <small>Topic đã cấu hình</small>
+          </div>
+          <div class="stat span-3">
+            <div class="stat-head">Kênh đích<span class="stat-icon"><i data-lucide="radio-tower" class="icon"></i></span></div>
+            <strong id="st-channels">0</strong>
+            <small>Registry kênh</small>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="panel span-7">
+            <div class="panel-head">
+              <div class="panel-title"><h3>Kho media theo topic</h3><span>Trạng thái bài trong từng topic nguồn.</span></div>
+              <button class="btn btn-warning btn-mini"><i data-lucide="scan-line" class="icon"></i>Scan</button>
+            </div>
+            <div class="panel-body">
+              <div class="empty-state">
+                <div class="icon-big">📂</div>
+                <h4>Chưa có dữ liệu</h4>
+                <p>Bấm Scan để lấy inventory từ backend</p>
+              </div>
+            </div>
+          </div>
+          <div class="panel span-5">
+            <div class="panel-head">
+              <div class="panel-title"><h3>Máy đang chạy</h3><span>CPU, RAM, disk.</span></div>
+              <button class="btn btn-secondary btn-mini"><i data-lucide="refresh-cw" class="icon"></i>Refresh</button>
+            </div>
+            <div class="panel-body" id="machinePnl">
+              <div class="form-grid-3" style="gap:10px;margin-bottom:10px">
+                <div class="af-stat"><strong id="m-cpu">—</strong><span>CPU %</span></div>
+                <div class="af-stat"><strong id="m-ram">—</strong><span>RAM MB</span></div>
+                <div class="af-stat"><strong id="m-disk">—</strong><span>Disk GB</span></div>
+              </div>
+              <div class="run-note"><span><strong>Backend offline</strong> Khởi động server để xem số thật.</span></div>
+            </div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head">
+              <div class="panel-title"><h3>Jobs đang chạy</h3><span>Queue, tiến độ và trạng thái worker.</span></div>
+            </div>
+            <div class="panel-body">
+              <div class="empty-state">
+                <div class="icon-big">✓</div>
+                <h4>Không có job nào đang chạy</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ UP BÀI ADS ══════════════ -->
+      <section class="section" id="sec-topics">
+        <div class="section-head">
+          <div class="section-title">
+            <h2>Up bài ads / không ads</h2>
+            <p>Mapping nguồn → đích. Một nguồn, nhiều nhánh và nhiều kênh đích.</p>
+          </div>
+          <div class="toolbar">
+            <button class="btn btn-secondary btn-mini"><i data-lucide="file-text" class="icon"></i>Sinh topic_map.txt</button>
+            <button class="btn btn-primary" onclick="toggleMappingForm()"><i data-lucide="plus" class="icon"></i>Thêm mapping</button>
+          </div>
+        </div>
+
+        <!-- Ads source -->
+        <div class="panel" style="margin-bottom:16px">
+          <div class="panel-head">
+            <div class="panel-title"><h3>Nguồn bài ads</h3><span>Kênh/nhóm dùng để xen ads vào.</span></div>
+            <button class="btn btn-warning btn-mini"><i data-lucide="search" class="icon"></i>Check nguồn ads</button>
+          </div>
+          <div style="padding:14px 18px">
+            <form style="display:flex;gap:10px;align-items:flex-end" onsubmit="addAds(event)">
+              <div class="field" style="flex:1">
+                <label>Link/kênh/nhóm ads</label>
+                <input class="input" id="adSourceInput" placeholder="https://t.me/... hoặc -100444555666">
+              </div>
+              <button class="btn btn-primary" type="submit"><i data-lucide="plus" class="icon"></i>Lưu nguồn ads</button>
+            </form>
+            <div id="adSourceList" style="margin-top:12px"></div>
+          </div>
+        </div>
+
+        <!-- Mapping form (hidden) -->
+        <div class="panel" id="mappingFormCard" style="display:none;margin-bottom:16px">
+          <div class="panel-head">
+            <div class="panel-title"><h3 id="mappingFormTitle">Thêm mapping</h3></div>
+            <button class="btn btn-ghost btn-mini" onclick="hideMappingForm()">✕</button>
+          </div>
+          <div class="topic-form">
+            <div class="topic-form-grid">
+              <div class="field"><label>Tên mapping *</label><input class="input" id="mName" placeholder="vd: vitamin → pro"></div>
+              <div class="field"><label>Chat ID nguồn *</label><input class="input" id="mSrcChat" type="number" placeholder="-1001234567890"></div>
+              <div class="field"><label>Topic ID nguồn</label><input class="input" id="mSrcTopic" type="number" placeholder="0 (để trống nếu không dùng)"></div>
+              <div class="field">
+                <label>Chế độ ads</label>
+                <select class="select" id="mAdsMode">
+                  <option value="normal">Normal — xen đều</option>
+                  <option value="xdone">XDone — ads giữa</option>
+                  <option value="zdone">ZDone — ads trước</option>
+                </select>
+              </div>
+            </div>
+            <div class="field" style="margin-bottom:12px">
+              <label>Kênh đích</label>
+              <div id="destStack">
+                <div class="dest-row">
+                  <input class="input" placeholder="Dest Chat ID" style="flex:1">
+                  <input class="input" placeholder="Topic ID (tuỳ chọn)" style="flex:1">
+                  <button class="btn btn-ghost btn-mini" type="button">✕</button>
+                </div>
+              </div>
+              <button class="btn btn-secondary btn-mini" style="margin-top:6px" onclick="addDestRow()"><i data-lucide="plus" class="icon"></i>Thêm đích</button>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:8px">
+              <button class="btn btn-secondary" onclick="hideMappingForm()">Hủy</button>
+              <button class="btn btn-primary" onclick="saveMapping()">Lưu mapping</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mapping list -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><h3>Mapping đang có</h3><span>Bấm vào dòng để mở panel chỉnh sửa.</span></div>
+            <div class="panel-actions">
+              <button class="btn btn-ghost btn-mini" onclick="expandAll()">Mở rộng tất cả</button>
+              <button class="btn btn-ghost btn-mini" onclick="collapseAll()">Thu gọn tất cả</button>
+            </div>
+          </div>
+          <div style="padding:12px" id="mappingList">
+            <div class="empty-state"><div class="icon-big">🗺</div><h4>Chưa có mapping nào</h4><p>Bấm "+ Thêm mapping" để tạo</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ ADS CUỐI ══════════════ -->
+      <section class="section" id="sec-alltask">
+        <div class="section-head">
+          <div class="section-title"><h2>Ads cuối phiên</h2><p>Chọn nguồn ads, kênh đích và chạy cuối phiên.</p></div>
+          <button class="btn btn-success"><i data-lucide="play" class="icon"></i>Chạy ads cuối</button>
+        </div>
+        <div class="grid">
+          <div class="panel span-5">
+            <div class="panel-head"><div class="panel-title"><h3>Cấu hình ads cuối</h3></div></div>
+            <div class="panel-body">
+              <form class="form-stack" onsubmit="return false">
+                <div class="switch-line"><strong>Bật ads cuối</strong><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+                <div class="field"><label>Nguồn ads cuối</label><input class="input" placeholder="https://t.me/c/.../... hoặc -100..." value="https://t.me/c/1234567890/5/678"></div>
+                <div class="field">
+                  <label>Cách lấy nguồn</label>
+                  <div class="mode-tags">
+                    <label class="mode-tag"><input type="radio" name="srcMode" value="all" checked><span>Lấy toàn bộ</span></label>
+                    <label class="mode-tag"><input type="radio" name="srcMode" value="single"><span>Chỉ bài được nhập</span></label>
+                  </div>
+                </div>
+                <div class="field">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                    <label style="margin:0">Kênh ads đích</label>
+                    <div style="display:flex;gap:6px">
+                      <button class="btn btn-secondary btn-mini" type="button">Chọn tất cả</button>
+                      <button class="btn btn-secondary btn-mini" type="button">Bỏ chọn</button>
+                    </div>
+                  </div>
+                  <div class="channel-picker">
+                    <div class="ch-pick"><label><input type="checkbox" checked> @kenh_pro · -1001111111</label></div>
+                    <div class="ch-pick"><label><input type="checkbox"> @kenh_real · -1002222222</label></div>
+                    <div class="ch-pick"><label><input type="checkbox" checked> @kenh_vip · -1003333333</label></div>
+                  </div>
+                </div>
+                <button class="btn btn-primary" type="submit"><i data-lucide="save" class="icon"></i>Lưu ads cuối</button>
+              </form>
+            </div>
+          </div>
+          <div class="panel span-7">
+            <div class="panel-head"><div class="panel-title"><h3>Trạng thái lần chạy cuối</h3></div></div>
+            <div class="panel-body">
+              <div class="empty-state"><div class="icon-big">⏳</div><h4>Chưa chạy lần nào</h4></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ VẬN HÀNH BOT ══════════════ -->
+      <section class="section" id="sec-botops">
+        <!-- Users -->
+        <div class="subpage-panel active" id="botops-users">
+          <div class="section-head">
+            <div class="section-title"><h2>User của bot</h2><p>Thống kê ai đang dùng bot.</p></div>
+            <div class="toolbar">
+              <select class="select" style="width:160px"><option>Tất cả bot</option></select>
+              <input class="input" placeholder="Tìm ID, @username..." style="width:200px">
+              <button class="btn btn-secondary btn-mini"><i data-lucide="download" class="icon"></i>Xuất TXT</button>
+            </div>
+          </div>
+          <div class="grid" style="margin-bottom:16px">
+            <div class="stat span-3"><div class="stat-head">Tổng user<span class="stat-icon">US</span></div><strong>0</strong><small>Đang theo dõi</small></div>
+            <div class="stat span-3"><div class="stat-head">Premium<span class="stat-icon">PR</span></div><strong>0</strong><small>User Premium</small></div>
+            <div class="stat span-3"><div class="stat-head">Ngôn ngữ<span class="stat-icon">LG</span></div><strong>0</strong><small>Language codes</small></div>
+            <div class="stat span-3"><div class="stat-head">Bot lọc<span class="stat-icon">BT</span></div><strong>Tất cả</strong><small>Đang xem</small></div>
+          </div>
+          <div class="panel"><div class="panel-body"><div class="empty-state"><div class="icon-big">👥</div><h4>Chưa có user</h4><p>User sẽ xuất hiện khi bot nhận /start</p></div></div></div>
+        </div>
+
+        <!-- Cấu hình bot -->
+        <div class="subpage-panel" id="botops-modules">
+          <div class="section-head">
+            <div class="section-title"><h2>Cấu hình bot</h2><p>Bật/tắt module, tuỳ chọn ads và caption.</p></div>
+            <button class="btn btn-primary"><i data-lucide="save" class="icon"></i>Lưu cấu hình bot</button>
+          </div>
+          <div class="grid">
+            <div class="panel span-6">
+              <div class="panel-head"><div class="panel-title"><h3><i data-lucide="archive" class="icon"></i> Xem lại bài cũ</h3></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+              <div class="panel-body"><div class="bot-module-options"><label class="check"><input type="checkbox"><span>Trộn ads</span></label><div class="switch-line"><span>Tự xoá sau (phút)</span><input class="input" type="number" value="0" style="width:80px"></div><div class="field"><label>Caption</label><textarea class="input" rows="2" placeholder="Caption thông báo..."></textarea></div></div></div>
+            </div>
+            <div class="panel span-6">
+              <div class="panel-head"><div class="panel-title"><h3><i data-lucide="link" class="icon"></i> File to link</h3></div><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+              <div class="panel-body"><div class="bot-module-options"><label class="check"><input type="checkbox"><span>Protect content</span></label><label class="check"><input type="checkbox" checked><span>Cho phép forward</span></label><div class="field"><label>Giới hạn xem (0 = không giới hạn)</label><input class="input" type="number" value="0"></div></div></div>
+            </div>
+            <div class="panel span-6">
+              <div class="panel-head"><div class="panel-title"><h3><i data-lucide="users" class="icon"></i> Force join kênh</h3></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+              <div class="panel-body"><div class="form-stack"><div class="field"><label>Kênh bắt buộc tham gia</label><input class="input" placeholder="@username hoặc -100..."></div><div class="field"><label>Tin nhắn khi chưa join</label><textarea class="input" rows="2" placeholder="Bạn cần tham gia kênh..."></textarea></div></div></div>
+            </div>
+            <div class="panel span-6">
+              <div class="panel-head"><div class="panel-title"><h3><i data-lucide="zap" class="icon"></i> Broadcast</h3></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+              <div class="panel-body"><div class="bot-module-options"><div class="field"><label>Tốc độ gửi (msg/giây)</label><input class="input" type="number" value="1" min="1" max="30"></div><label class="check"><input type="checkbox"><span>Chỉ gửi user Premium</span></label></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Archive -->
+        <div class="subpage-panel" id="botops-archive">
+          <div class="section-head">
+            <div class="section-title"><h2>Kho bài đã up</h2><p>Toàn bộ bài đã gửi qua bot.</p></div>
+            <div class="toolbar">
+              <input class="input" placeholder="Tìm kiếm..." style="width:200px">
+              <input class="input" type="date" style="width:150px">
+              <button class="btn btn-secondary btn-mini"><i data-lucide="refresh-cw" class="icon"></i>Làm mới</button>
+            </div>
+          </div>
+          <div class="panel"><div class="panel-body"><div class="empty-state"><div class="icon-big">📦</div><h4>Kho trống</h4><p>Bài sẽ xuất hiện sau khi gửi qua bot</p></div></div></div>
+        </div>
+
+        <!-- File to link -->
+        <div class="subpage-panel" id="botops-filelink">
+          <div class="section-head">
+            <div class="section-title"><h2>File to link</h2><p>Tạo link chia sẻ media qua bot.</p></div>
+          </div>
+          <div class="grid">
+            <div class="panel span-5">
+              <div class="panel-head"><div class="panel-title"><h3>Tạo link mới</h3></div></div>
+              <div class="panel-body">
+                <div class="form-stack">
+                  <div class="field"><label>User Telegram</label><select class="select"><option>— chọn user —</option></select></div>
+                  <div class="field"><label>Media</label><select class="select"><option>— chọn media —</option></select></div>
+                  <div class="field"><label>Hết hạn sau (giờ, 0 = không hết)</label><input class="input" type="number" value="0"></div>
+                  <div class="field"><label>Giới hạn xem (0 = không)</label><input class="input" type="number" value="0"></div>
+                  <div class="switch-line"><span>Protect content</span><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+                  <button class="btn btn-primary"><i data-lucide="link" class="icon"></i>Tạo file link</button>
+                </div>
+              </div>
+            </div>
+            <div class="panel span-7">
+              <div class="panel-head">
+                <div class="panel-title"><h3>Cấu hình backup forum</h3></div>
+              </div>
+              <div class="panel-body">
+                <div class="form-stack">
+                  <div class="switch-line"><strong>Backup media về forum</strong><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+                  <div class="field"><label>Forum ID / Link</label><input class="input" placeholder="-100... hoặc https://t.me/+xxx"></div>
+                  <div style="display:flex;gap:8px">
+                    <button class="btn btn-primary btn-mini"><i data-lucide="save" class="icon"></i>Lưu cấu hình backup</button>
+                    <button class="btn btn-secondary btn-mini">Kiểm tra quyền bot</button>
+                    <button class="btn btn-secondary btn-mini">Mở kho link share →</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kho link share -->
+        <div class="subpage-panel" id="botops-shares">
+          <div class="section-head">
+            <div class="section-title"><h2>Kho link share</h2><p>Danh sách link đã tạo.</p></div>
+            <div class="toolbar">
+              <select class="select" style="width:140px"><option>Tất cả trạng thái</option><option>Còn hạn</option><option>Hết hạn</option></select>
+              <button class="btn btn-secondary btn-mini"><i data-lucide="refresh-cw" class="icon"></i>Làm mới</button>
+              <button class="btn btn-secondary btn-mini">← Quay lại File to link</button>
+            </div>
+          </div>
+          <div class="panel"><div class="panel-body"><div class="empty-state"><div class="icon-big">🔗</div><h4>Chưa có link nào</h4></div></div></div>
+        </div>
+
+        <!-- Mã xem -->
+        <div class="subpage-panel" id="botops-viewcodes">
+          <div class="section-head">
+            <div class="section-title"><h2>Mã xem</h2><p>Mã truy cập kho bài cho user.</p></div>
+            <button class="btn btn-primary btn-mini"><i data-lucide="save" class="icon"></i>Lưu cấu hình</button>
+          </div>
+          <div class="grid">
+            <div class="panel span-5">
+              <div class="panel-head"><div class="panel-title"><h3>Cấu hình mã xem</h3></div></div>
+              <div class="panel-body">
+                <div class="form-stack">
+                  <div class="form-grid">
+                    <div class="field"><label>Độ dài mã tối thiểu</label><input class="input" type="number" value="6"></div>
+                    <div class="field"><label>Độ dài mã tối đa</label><input class="input" type="number" value="10"></div>
+                  </div>
+                  <div class="switch-line"><span>Cho phép tạo mã mới</span><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+                </div>
+              </div>
+            </div>
+            <div class="panel span-7">
+              <div class="panel-head">
+                <div class="panel-title"><h3>Danh sách mã xem</h3></div>
+                <button class="btn btn-secondary btn-mini"><i data-lucide="refresh-cw" class="icon"></i>Làm mới</button>
+              </div>
+              <div class="panel-body"><div class="empty-state"><div class="icon-big">🔐</div><h4>Chưa có mã nào</h4></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Anti-flood -->
+        <div class="subpage-panel" id="botops-antiflood">
+          <div class="section-head">
+            <div class="section-title"><h2>Anti-flood</h2><p>Mô phỏng và kiểm tra logic chống spam.</p></div>
+            <div class="toolbar">
+              <button class="btn btn-success" id="afStartBtn" onclick="afStart()"><i data-lucide="play" class="icon"></i>Chạy mô phỏng</button>
+              <button class="btn btn-danger" id="afStopBtn" onclick="afStop()" disabled><i data-lucide="square" class="icon"></i>Dừng</button>
+            </div>
+          </div>
+          <div class="grid">
+            <div class="panel span-5">
+              <div class="panel-head"><div class="panel-title"><h3>Tham số</h3></div></div>
+              <div class="panel-body">
+                <div class="form-stack">
+                  <div class="form-grid">
+                    <div class="field"><label>Số user giả</label><input class="input" type="number" id="afUsers" value="20"></div>
+                    <div class="field"><label>Req/giây</label><input class="input" type="number" id="afRate" value="5"></div>
+                    <div class="field"><label>Burst</label><input class="input" type="number" id="afBurst" value="10"></div>
+                    <div class="field"><label>Thời gian chạy (s)</label><input class="input" type="number" id="afDur" value="10"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="panel span-7">
+              <div class="panel-head"><div class="panel-title"><h3>Kết quả mô phỏng</h3></div></div>
+              <div class="panel-body">
+                <div class="af-grid" style="margin-bottom:14px">
+                  <div class="af-stat"><strong id="af-req">0</strong><span>Requests</span></div>
+                  <div class="af-stat"><strong id="af-ok">0</strong><span>OK</span></div>
+                  <div class="af-stat"><strong id="af-flood">0</strong><span>FloodWait</span></div>
+                </div>
+                <div class="progress" style="margin-bottom:10px"><div class="progress-fill" id="af-progress" style="width:0%"></div></div>
+                <div class="terminal"><div class="terminal-bar" aria-hidden="true"><span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-dot"></span></div><div class="terminal-log" id="af-log" style="height:120px"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ ADMIN BOT ══════════════ -->
+      <section class="section" id="sec-botadmin">
+        <!-- Forum -->
+        <div class="subpage-panel active" id="botadmin-forum">
+          <div class="section-head">
+            <div class="section-title"><h2>Forum chung admin</h2><p>Cấu hình forum để các bot báo cáo và nhận log.</p></div>
+          </div>
+          <div class="grid">
+            <div class="panel span-5">
+              <div class="panel-head"><div class="panel-title"><h3>Cấu hình forum</h3></div></div>
+              <div class="panel-body">
+                <div class="form-stack">
+                  <div class="field"><label>Forum Chat ID</label><input class="input" placeholder="-100xxxxxxxxxx"></div>
+                  <div class="field"><label>Root topic ID</label><input class="input" type="number" placeholder="0"></div>
+                  <div class="switch-line"><span>Tự tạo topic khi START</span><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+                  <div class="switch-line"><span>Auto pin link ngày mai</span><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+                  <button class="btn btn-primary"><i data-lucide="save" class="icon"></i>Lưu forum chung</button>
+                </div>
+              </div>
+            </div>
+            <div class="panel span-7">
+              <div class="panel-head"><div class="panel-title"><h3>Trạng thái forum</h3></div></div>
+              <div class="panel-body"><div class="run-note"><span><strong>Chưa cấu hình</strong> Nhập Chat ID và lưu để kết nối forum admin.</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Topics -->
+        <div class="subpage-panel" id="botadmin-topics">
+          <div class="section-head"><div class="section-title"><h2>Topic quản lí từng bot</h2><p>Mỗi bot một topic riêng trong forum admin.</p></div></div>
+          <div class="panel"><div class="panel-body"><div class="empty-state"><div class="icon-big">🗂</div><h4>Chưa có topic nào</h4></div></div></div>
+        </div>
+
+        <!-- Progress -->
+        <div class="subpage-panel" id="botadmin-progress">
+          <div class="section-head">
+            <div class="section-title"><h2>Tiến độ up từng topic</h2><p>Bot báo cáo khi đổi topic, cập nhật cursor bài hiện tại.</p></div>
+            <button class="btn btn-secondary btn-mini"><i data-lucide="refresh-cw" class="icon"></i>Refresh tiến độ</button>
+          </div>
+          <div class="panel"><div class="panel-body"><div class="empty-state"><div class="icon-big">📊</div><h4>Chưa có tiến độ</h4></div></div></div>
+        </div>
+
+        <!-- Invite -->
+        <div class="subpage-panel" id="botadmin-invite">
+          <div class="section-head"><div class="section-title"><h2>Mời bot vào forum</h2><p>Kiểm tra quyền bot trong forum và thực hiện invite.</p></div></div>
+          <div class="grid">
+            <div class="panel span-6">
+              <div class="panel-head"><div class="panel-title"><h3>Forum mời bot</h3></div></div>
+              <div class="panel-body">
+                <div class="form-stack">
+                  <div class="field"><label>ID / Link forum</label><input class="input" placeholder="-100xxxxxxxxxx hoặc https://t.me/+xxxxx"></div>
+                  <p class="hint">Forum phải bật Topics. Bot cần quyền Manage topics + Send media.</p>
+                  <button class="btn btn-primary btn-mini"><i data-lucide="save" class="icon"></i>Lưu forum mời bot</button>
+                </div>
+              </div>
+            </div>
+            <div class="panel span-6">
+              <div class="panel-head"><div class="panel-title"><h3>Danh sách bot cần mời</h3></div></div>
+              <div class="panel-body"><div class="empty-state"><div class="icon-big">🤖</div><h4>Chưa có bot</h4></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Logs admin -->
+        <div class="subpage-panel" id="botadmin-logs">
+          <div class="section-head"><div class="section-title"><h2>Log hệ thống & spam</h2><p>Cảnh báo spam, lỗi copy album, hết quyền forum.</p></div></div>
+          <div class="panel"><div class="panel-body"><div class="empty-state"><div class="icon-big">📋</div><h4>Không có log</h4></div></div></div>
+        </div>
+      </section>
+
+      <!-- ══════════════ KÊNH & FOLDER ══════════════ -->
+      <section class="section" id="sec-channels">
+        <div class="section-head">
+          <div class="section-title"><h2>Kênh & folder</h2><p>Registry duy nhất. Nhập id/link/@username — tên và ảnh tự sync từ Telegram.</p></div>
+          <div class="toolbar">
+            <button class="btn btn-primary" onclick="openAddCh()"><i data-lucide="plus" class="icon"></i>Thêm kênh</button>
+            <button class="btn btn-secondary btn-mini"><i data-lucide="image" class="icon"></i>Load ảnh + tên</button>
+            <button class="btn btn-secondary btn-mini"><i data-lucide="refresh-cw" class="icon"></i>Sync folder</button>
+            <button class="btn btn-warning btn-mini"><i data-lucide="search" class="icon"></i>Check kênh chết</button>
+            <button class="btn btn-danger btn-mini"><i data-lucide="trash-2" class="icon"></i>Xóa kênh chết</button>
+          </div>
+        </div>
+        <div class="panel" style="margin-bottom:16px">
+          <div class="panel-head">
+            <div class="panel-title"><h3>Danh sách kênh đích</h3><span id="chCountLabel">0 kênh</span></div>
+          </div>
+          <div class="panel-search"><input class="input" id="chSearch" placeholder="Tìm theo id, tên, @username..." oninput="filterChannels()"></div>
+          <div style="padding:0 0 8px" id="chListWrap">
+            <div class="empty-state"><div class="icon-big">📡</div><h4>Chưa có kênh nào</h4><p>Bấm "+ Thêm kênh" để thêm vào registry</p></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div class="panel-title"><h3>Kênh chết — đã đánh dấu</h3></div></div>
+          <div class="panel-body"><div class="empty-state"><div class="icon-big">💀</div><h4>Không có kênh chết</h4></div></div>
+        </div>
+      </section>
+
+      <!-- ══════════════ LỊCH AUTO ══════════════ -->
+      <section class="section" id="sec-schedule">
+        <div class="section-head"><div class="section-title"><h2>Lịch auto</h2><p>Chọn thứ tự và điều kiện các bước vận hành.</p></div></div>
+        <div class="grid">
+          <div class="panel span-4">
+            <div class="panel-head"><div class="panel-title"><h3>Cấu hình chung</h3></div></div>
+            <div class="panel-body">
+              <div class="form-stack">
+                <div class="switch-line"><strong>Bật lịch auto</strong><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+                <div class="form-grid">
+                  <div class="field"><label>Giờ chạy</label><input class="input" type="time" value="08:00"></div>
+                  <div class="field"><label>Timezone</label><select class="select"><option>Asia/Bangkok</option><option>Asia/Ho_Chi_Minh</option><option>UTC</option></select></div>
+                </div>
+                <div class="field"><label>Chu kỳ lặp</label><select class="select"><option>Một lần trong ngày</option><option>Mỗi 6 giờ</option><option>Mỗi 3 giờ</option><option>Mỗi giờ</option></select></div>
+                <div class="switch-line"><span>Chỉ chạy khi đã START</span><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+                <div class="switch-line"><span>Dừng nếu thiếu media bắt buộc</span><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+                <button class="btn btn-primary"><i data-lucide="save" class="icon"></i>Lưu lịch</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel span-8">
+            <div class="panel-head"><div class="panel-title"><h3>Phân luồng chạy</h3><span>Kéo thả để đổi thứ tự bước trong một lượt.</span></div></div>
+            <div class="panel-body">
+              <div class="flow-board">
+                <div class="flow-list" id="flowList">
+                  <div class="flow-item"><span class="flow-handle"><i data-lucide="grip-vertical" class="icon"></i></span><span class="flow-label">1. Up bài ads (Mapping chính)</span><span class="flow-meta">mapping × 4</span></div>
+                  <div class="flow-item"><span class="flow-handle"><i data-lucide="grip-vertical" class="icon"></i></span><span class="flow-label">2. Ads cuối phiên</span><span class="flow-meta">allTask</span></div>
+                  <div class="flow-item"><span class="flow-handle"><i data-lucide="grip-vertical" class="icon"></i></span><span class="flow-label">3. Archive bot</span><span class="flow-meta">bot × 1</span></div>
+                  <div class="flow-item"><span class="flow-handle"><i data-lucide="grip-vertical" class="icon"></i></span><span class="flow-label">4. Backup dữ liệu</span><span class="flow-meta">auto backup</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ ADMIN USERBOT ══════════════ -->
+      <section class="section" id="sec-telegram">
+        <div class="section-head">
+          <div class="section-title"><h2>Đăng nhập admin</h2><p>Tài khoản admin userbot dùng để đọc nguồn, forward bài và tạo topic forum.</p></div>
+        </div>
+        <div class="grid">
+          <div class="panel span-6">
+            <div class="panel-head"><div class="panel-title"><h3>Đăng nhập userbot</h3><span>Login tài khoản Telegram admin, lưu session để tự kết nối lại.</span></div></div>
+            <div class="panel-body">
+              <div class="form-stack">
+                <div class="run-note" id="ubStatusBlock">
+                  <span><strong>Trạng thái</strong> <span class="badge off">Chưa đăng nhập</span></span>
+                </div>
+
+                <!-- Logged in card (hidden by default) -->
+                <div class="logged-in-card" id="ubLoggedCard" style="display:none">
+                  <div class="logged-in-avatar"><i data-lucide="user-check" class="icon"></i></div>
+                  <div>
+                    <div class="logged-in-name" id="ubName">@username</div>
+                    <div class="logged-in-meta" id="ubMeta">+66•••••</div>
+                  </div>
+                  <div class="logged-in-actions">
+                    <button class="btn btn-ghost btn-mini" onclick="ubRelogin()"><i data-lucide="refresh-cw" class="icon"></i>Đổi tài khoản</button>
+                    <button class="btn btn-danger btn-mini" onclick="ubLogout()"><i data-lucide="log-out" class="icon"></i>Đăng xuất</button>
+                  </div>
+                </div>
+
+                <!-- Step: phone -->
+                <div id="stepPhone">
+                  <div class="field"><label>Số điện thoại admin</label><input class="input" id="ubPhone" placeholder="+66xxxxxxxxx" autocomplete="tel"></div>
+                </div>
+                <!-- Step: OTP -->
+                <div id="stepOtp" style="display:none">
+                  <div class="field"><label>Mã OTP (từ Telegram)</label><input class="input" id="ubOtp" placeholder="12345" inputmode="numeric" autocomplete="one-time-code"></div>
+                </div>
+                <!-- Step: 2FA -->
+                <div id="step2fa" style="display:none">
+                  <div class="field"><label>Mật khẩu 2FA</label><input class="input" id="ub2fa" type="password" placeholder="Cloud Password" autocomplete="current-password"></div>
+                </div>
+
+                <div style="display:flex;gap:8px" id="ubToolbar">
+                  <button class="btn btn-secondary" id="ubSendBtn" onclick="ubSendCode()"><i data-lucide="message-square" class="icon"></i>Gửi mã OTP</button>
+                  <button class="btn btn-success" id="ubConfirmBtn" onclick="ubConfirm()" disabled><i data-lucide="log-in" class="icon"></i>Xác nhận login</button>
+                </div>
+                <div class="switch-line"><span>Tự kết nối lại khi mở tool</span><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel span-6">
+            <div class="panel-head"><div class="panel-title"><h3>Cấu hình API Hash</h3><span>API ID/Hash từ my.telegram.org/apps.</span></div></div>
+            <div class="panel-body">
+              <div class="form-stack">
+                <div class="form-grid">
+                  <div class="field"><label>API ID</label><input class="input" id="ubApiId" placeholder="1234567"></div>
+                  <div class="field"><label>API Hash (32 ký tự)</label><input class="input" id="ubApiHash" type="password" placeholder="••••••••••••••••••••••••••••••••" maxlength="32"></div>
+                </div>
+                <div class="field"><label>Đường dẫn session</label><input class="input" value="data/sessions/admin_userbot.session" readonly></div>
+                <div class="form-grid">
+                  <div class="field"><label>Device model</label><input class="input" value="UpBain Admin"></div>
+                  <div class="field"><label>App version</label><input class="input" value="1.0"></div>
+                </div>
+                <button class="btn btn-primary" onclick="ubSaveConfig()"><i data-lucide="save" class="icon"></i>Lưu cấu hình API</button>
+                <div class="run-note"><span><strong>Lưu ý bảo mật</strong> API Hash được mã hoá AES-256 phía server. Không bao giờ hiển thị lại giá trị đầy đủ.</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel span-12">
+            <div class="panel-head">
+              <div class="panel-title"><h3>Bot credentials</h3><span>Token bot được lưu mã hoá, chỉ hiện fingerprint.</span></div>
+              <button class="btn btn-primary btn-mini" onclick="openAddBot()"><i data-lucide="plus" class="icon"></i>Thêm bot</button>
+            </div>
+            <div class="panel-body" id="botCredList">
+              <div class="empty-state"><div class="icon-big">🤖</div><h4>Chưa có bot nào</h4><p>Bấm "+ Thêm bot" để thêm token</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ BACKUP & DỮ LIỆU ══════════════ -->
+      <section class="section" id="sec-import">
+        <div class="section-head">
+          <div class="section-title"><h2>Backup & dữ liệu</h2><p>Import dữ liệu cũ, đặt lịch backup hoặc backup ngay.</p></div>
+          <button class="btn btn-secondary btn-mini" onclick="backupNow()"><i data-lucide="download" class="icon"></i>Backup ngay</button>
+        </div>
+        <div class="grid">
+          <div class="panel span-5">
+            <div class="panel-head"><div class="panel-title"><h3>Import dữ liệu cũ</h3><span>Đọc từ backup hoặc folder tool cũ.</span></div></div>
+            <div class="panel-body">
+              <div class="form-stack">
+                <div class="dropzone" id="dropzone" ondragover="event.preventDefault()" ondrop="dropFile(event)">
+                  <strong>Kéo file / ZIP vào đây</strong>
+                  <p class="hint">Hỗ trợ .env, channels.json, topic_map.txt, *.session, auto_config.json</p>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <button class="btn btn-success btn-mini"><i data-lucide="eye" class="icon"></i>Preview import</button>
+                  <button class="btn btn-secondary btn-mini"><i data-lucide="folder-open" class="icon"></i>Import từ workspace</button>
+                  <button class="btn btn-secondary btn-mini"><i data-lucide="refresh-cw" class="icon"></i>Resync disk</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel span-7">
+            <div class="panel-head">
+              <div class="panel-title"><h3>Lịch sử backup</h3></div>
+              <button class="btn btn-secondary btn-mini" onclick="loadBackups()"><i data-lucide="refresh-cw" class="icon"></i>Làm mới</button>
+            </div>
+            <div style="padding:12px" id="backupList">
+              <div class="empty-state"><div class="icon-big">📦</div><h4>Chưa có backup nào</h4></div>
+            </div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head"><div class="panel-title"><h3>Lịch backup tự động</h3></div></div>
+            <div class="panel-body">
+              <div class="form-stack">
+                <div class="switch-line"><strong>Backup sau khi chạy lịch up bài</strong><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+                <div class="form-grid">
+                  <div class="field"><label>Giữ backup trong (ngày)</label><input class="input" type="number" value="7"></div>
+                  <div class="field"><label>Thư mục backup</label><input class="input" value="data/backups/" readonly></div>
+                </div>
+                <button class="btn btn-primary btn-mini"><i data-lucide="save" class="icon"></i>Lưu lịch backup</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel span-12">
+            <div class="panel-head">
+              <div class="panel-title"><h3>Audit log & Sandbox</h3></div>
+              <div class="panel-actions">
+                <button class="btn btn-secondary btn-mini" id="sandboxStartBtn"><i data-lucide="circle-dot" class="icon"></i>Bắt đầu ghi</button>
+                <button class="btn btn-secondary btn-mini"><i data-lucide="play" class="icon"></i>Replay</button>
+                <button class="btn btn-secondary btn-mini"><i data-lucide="download" class="icon"></i>Export JSON</button>
+                <button class="btn btn-danger btn-mini"><i data-lucide="trash-2" class="icon"></i>Xoá log</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="form-grid-3" style="margin-bottom:14px">
+                <div class="form-row"><label>Tốc độ replay (ms)</label><input class="input" type="number" value="200"></div>
+                <div class="form-row"><label>Số tin đã ghi</label><input class="input" value="0" disabled></div>
+                <div class="form-row"><label>Trạng thái</label><input class="input" value="idle" disabled></div>
+              </div>
+              <div class="empty-state"><div class="icon-big">🔍</div><h4>Không có audit log</h4></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════ LOG REALTIME ══════════════ -->
+      <section class="section" id="sec-logs">
+        <div class="section-head">
+          <div class="section-title"><h2>Log realtime</h2><p>Luồng log từ runtime/SSE, action queue và tiến độ up bài.</p></div>
+          <div class="toolbar">
+            <span class="live" id="sseStatus"><span class="dot"></span>Connecting...</span>
+            <button class="btn btn-danger btn-mini" onclick="clearLogs()"><i data-lucide="trash-2" class="icon"></i>Clear logs</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="terminal">
+            <div class="terminal-bar" aria-hidden="true"><span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-dot"></span></div>
+            <div class="terminal-log" id="logList" style="height:400px">
+              <div class="log-line info"><span class="ts">00:00:00</span><span class="msg">UpBain Control started — waiting for backend connection...</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /content -->
+  </main>
+</div><!-- /app -->
+
+<!-- ──── MODALS ──── -->
+
+<!-- Add channel modal -->
+<div class="modal" id="addChModal">
+  <div class="modal__backdrop" onclick="closeAddCh()"></div>
+  <div class="modal__panel">
+    <div class="modal__head">
+      <h3>Thêm kênh</h3>
+      <button class="btn-icon" onclick="closeAddCh()"><i data-lucide="x" class="icon"></i></button>
+    </div>
+    <div class="modal__body">
+      <p class="hint" style="margin-top:0">Nhập link / ID / @username / addlist — tên và ảnh tự sync từ Telegram.</p>
+      <div class="field">
+        <label>Link / ID / username / addlist</label>
+        <input class="input" id="addChInput" placeholder="@username, https://t.me/..., -100xxx">
+      </div>
+      <p class="hint" id="addChHint"></p>
+      <div class="modal__actions">
+        <button class="btn btn-ghost" onclick="closeAddCh()">Hủy</button>
+        <button class="btn btn-primary" onclick="submitAddCh()">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add bot modal -->
+<div class="modal" id="addBotModal">
+  <div class="modal__backdrop" onclick="closeAddBot()"></div>
+  <div class="modal__panel">
+    <div class="modal__head">
+      <h3>Thêm bot</h3>
+      <button class="btn-icon" onclick="closeAddBot()"><i data-lucide="x" class="icon"></i></button>
+    </div>
+    <div class="modal__body">
+      <div class="field"><label>Tên bot</label><input class="input" id="botName" placeholder="vd: Bot Pro"></div>
+      <div class="field">
+        <label>Bot Token</label>
+        <input class="input" id="botToken" type="password" placeholder="123456789:AAF..." autocomplete="new-password">
+        <span class="hint">Token sẽ được mã hoá và chỉ hiện fingerprint sau khi lưu.</span>
+      </div>
+      <div class="modal__actions">
+        <button class="btn btn-ghost" onclick="closeAddBot()">Hủy</button>
+        <button class="btn btn-primary" onclick="submitAddBot()">Xác thực & Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-box" id="toastBox"></div>
+
+<script>
+// ─── ICONS ───────────────────────────────────────────────────────────────────
+window.addEventListener('load',()=>{ try{lucide.createIcons()}catch(e){} });
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+const state = {
+  authenticated: false,
+  channels: [],
+  bots: [],
+  mappings: [],
+  runtimeEnabled: false,
+  ubStep: 'phone', // phone | otp | 2fa | logged_in
+};
+
+// ─── LOGIN ───────────────────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter' && document.getElementById('loginShell').style.display!=='none') doLogin();
+});
+
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  if(!u||!p){toast('Nhập tên đăng nhập và mật khẩu','err');return;}
+  const btn=document.getElementById('loginBtn');
+  btn.disabled=true; btn.textContent='...';
+  // Design prototype: accept any credentials
+  setTimeout(()=>{
+    state.authenticated=true;
+    document.getElementById('loginShell').setAttribute('hidden','');
+    document.getElementById('appShell').style.display='grid';
+    try{lucide.createIcons()}catch(e){}
+    addLog('Đã đăng nhập thành công','ok');
+    toast('Chào mừng, '+u,'ok');
+    btn.disabled=false; btn.textContent='Đăng nhập';
+  },600);
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+const TAB_MAP = {
+  dashboard:'sec-dashboard',topics:'sec-topics',alltask:'sec-alltask',
+  botops:'sec-botops',botadmin:'sec-botadmin',channels:'sec-channels',
+  schedule:'sec-schedule',telegram:'sec-telegram',import:'sec-import',logs:'sec-logs'
+};
+
+document.querySelectorAll('.nav-link[data-tab]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const tab=btn.dataset.tab;
+    // sublist toggle
+    const subId=btn.dataset.hasSub;
+    if(subId){
+      const sub=document.getElementById(subId);
+      const wasOpen=sub.classList.contains('open');
+      document.querySelectorAll('.nav-sublist').forEach(s=>s.classList.remove('open'));
+      if(!wasOpen) sub.classList.add('open');
+    } else {
+      document.querySelectorAll('.nav-sublist').forEach(s=>s.classList.remove('open'));
+    }
+    // activate
+    document.querySelectorAll('.nav-link').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const secId=TAB_MAP[tab];
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    if(secId) document.getElementById(secId).classList.add('active');
+    try{lucide.createIcons()}catch(e){}
+    // auto-open sub if tab has sub
+    if(subId) document.getElementById(subId).classList.add('open');
+  });
+});
+
+// subpage navigation
+document.querySelectorAll('.nav-sublink[data-subpage]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const target=btn.dataset.subpage;
+    // find parent section
+    const parentSec=btn.closest('.nav-sublist').id.replace('-sub','');
+    const secEl=document.getElementById('sec-'+parentSec);
+    if(!secEl) return;
+    // deactivate all subpanels in parent section
+    secEl.querySelectorAll('.subpage-panel').forEach(p=>p.classList.remove('active'));
+    const el=document.getElementById(target);
+    if(el) el.classList.add('active');
+    // update sublink active
+    btn.closest('.nav-sublist').querySelectorAll('.nav-sublink').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    try{lucide.createIcons()}catch(e){}
+  });
+});
+
+// ─── RUNTIME START/STOP ──────────────────────────────────────────────────────
+function doStart(){
+  state.runtimeEnabled=true;
+  document.getElementById('st-auto').textContent='Running';
+  document.getElementById('st-auto').style.color='var(--green)';
+  document.getElementById('topbarLabel').textContent='Runtime ON';
+  document.getElementById('topbarStatus').className='live';
+  addLog('Runtime START','ok');
+  toast('Runtime đã bật','ok');
+}
+
+function doStop(){
+  state.runtimeEnabled=false;
+  document.getElementById('st-auto').textContent='Stopped';
+  document.getElementById('st-auto').style.color='var(--muted)';
+  document.getElementById('topbarLabel').textContent='Runtime OFF';
+  document.getElementById('topbarStatus').className='live warn';
+  addLog('Runtime STOP','warn');
+  toast('Runtime đã dừng','warn');
+}
+
+// ─── MAPPINGS ────────────────────────────────────────────────────────────────
+function toggleMappingForm(){
+  const c=document.getElementById('mappingFormCard');
+  c.style.display=c.style.display==='none'?'block':'none';
+  try{lucide.createIcons()}catch(e){}
+}
+function hideMappingForm(){ document.getElementById('mappingFormCard').style.display='none'; }
+
+function addDestRow(){
+  const stack=document.getElementById('destStack');
+  const row=document.createElement('div');
+  row.className='dest-row';
+  row.innerHTML=`<input class="input" placeholder="Dest Chat ID" style="flex:1"><input class="input" placeholder="Topic ID (tuỳ chọn)" style="flex:1"><button class="btn btn-ghost btn-mini" type="button" onclick="this.parentElement.remove()">✕</button>`;
+  stack.appendChild(row);
+}
+
+function saveMapping(){
+  const name=document.getElementById('mName').value.trim();
+  const srcChat=document.getElementById('mSrcChat').value.trim();
+  if(!name||!srcChat){toast('Cần nhập tên và Chat ID nguồn','err');return;}
+  const m={id:Date.now(),name,srcChat,adsMode:document.getElementById('mAdsMode').value};
+  state.mappings.push(m);
+  document.getElementById('nc-topics').textContent=state.mappings.length;
+  document.getElementById('st-topics').textContent=state.mappings.length;
+  renderMappings();
+  hideMappingForm();
+  document.getElementById('mName').value='';
+  document.getElementById('mSrcChat').value='';
+  toast('Đã thêm mapping: '+name,'ok');
+  addLog('Mapping thêm: '+name,'ok');
+}
+
+function renderMappings(){
+  const el=document.getElementById('mappingList');
+  if(!state.mappings.length){
+    el.innerHTML='<div class="empty-state"><div class="icon-big">🗺</div><h4>Chưa có mapping nào</h4><p>Bấm "+ Thêm mapping" để tạo</p></div>';
+    return;
+  }
+  el.innerHTML=state.mappings.map(m=>`
+    <div class="mapping-card" id="mc-${m.id}">
+      <div class="mapping-card-head" onclick="toggleMC(${m.id})">
+        <span style="font-weight:600">${esc(m.name)}</span>
+        <span class="tag tag-blue" style="margin-left:8px">${esc(m.adsMode)}</span>
+        <span style="color:var(--muted);font-size:12px;margin-left:8px">src: <code>${esc(m.srcChat)}</code></span>
+        <span style="margin-left:auto;display:flex;gap:6px">
+          <button class="btn btn-success btn-mini" onclick="event.stopPropagation();runM(${m.id})">▶ Run</button>
+          <button class="btn btn-danger btn-mini" onclick="event.stopPropagation();delM(${m.id})">✕</button>
+        </span>
+      </div>
+      <div class="mapping-card-body">
+        <div class="mapping-grid">
+          <div class="field"><label>Nguồn Chat ID</label><input class="input" value="${esc(m.srcChat)}"></div>
+          <div class="field"><label>Chế độ ads</label><select class="select"><option ${m.adsMode==='normal'?'selected':''}>normal</option><option ${m.adsMode==='xdone'?'selected':''}>xdone</option><option ${m.adsMode==='zdone'?'selected':''}>zdone</option></select></div>
+        </div>
+        <button class="btn btn-primary btn-mini">Lưu thay đổi</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleMC(id){ document.getElementById('mc-'+id).classList.toggle('open'); }
+
+function delM(id){
+  state.mappings=state.mappings.filter(m=>m.id!==id);
+  document.getElementById('nc-topics').textContent=state.mappings.length;
+  document.getElementById('st-topics').textContent=state.mappings.length;
+  renderMappings();
+  toast('Đã xóa mapping','warn');
+}
+
+function runM(id){
+  const m=state.mappings.find(x=>x.id===id);
+  if(!m) return;
+  toast('Đã tạo job cho mapping: '+m.name,'ok');
+  addLog('Job created: mapping "'+m.name+'"','ok');
+}
+
+function expandAll(){ document.querySelectorAll('.mapping-card').forEach(c=>c.classList.add('open')); }
+function collapseAll(){ document.querySelectorAll('.mapping-card').forEach(c=>c.classList.remove('open')); }
+
+// ─── ADS SOURCE ──────────────────────────────────────────────────────────────
+const adSources=[];
+function addAds(e){
+  e.preventDefault();
+  const v=document.getElementById('adSourceInput').value.trim();
+  if(!v){toast('Nhập link hoặc chat ID nguồn ads','err');return;}
+  adSources.push(v);
+  document.getElementById('adSourceInput').value='';
+  renderAdSources();
+  toast('Đã lưu nguồn ads','ok');
+}
+function renderAdSources(){
+  const el=document.getElementById('adSourceList');
+  if(!adSources.length){el.innerHTML='';return;}
+  el.innerHTML=`<div class="table-wrap"><table class="tbl"><thead><tr><th>Nguồn</th><th></th></tr></thead><tbody>${adSources.map((s,i)=>`<tr><td><code>${esc(s)}</code></td><td><button class="btn btn-ghost btn-mini" onclick="delAds(${i})">✕</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+function delAds(i){ adSources.splice(i,1); renderAdSources(); }
+
+// ─── CHANNELS ────────────────────────────────────────────────────────────────
+function openAddCh(){ document.getElementById('addChModal').classList.add('open'); document.getElementById('addChInput').value=''; document.getElementById('addChInput').focus(); }
+function closeAddCh(){ document.getElementById('addChModal').classList.remove('open'); }
+function submitAddCh(){
+  const v=document.getElementById('addChInput').value.trim();
+  if(!v){toast('Nhập link hoặc ID kênh','err');return;}
+  const ch={id:Date.now(),raw:v,title:v,liveness:'unknown'};
+  state.channels.push(ch);
+  document.getElementById('nc-channels').textContent=state.channels.length;
+  document.getElementById('st-channels').textContent=state.channels.length;
+  renderChannels();
+  closeAddCh();
+  toast('Đã thêm kênh: '+v,'ok');
+}
+function filterChannels(){ renderChannels(); }
+function renderChannels(){
+  const el=document.getElementById('chListWrap');
+  const q=(document.getElementById('chSearch').value||'').toLowerCase();
+  const list=state.channels.filter(c=>c.raw.toLowerCase().includes(q)||c.title.toLowerCase().includes(q));
+  document.getElementById('chCountLabel').textContent=state.channels.length+' kênh';
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="icon-big">📡</div><h4>Chưa có kênh nào</h4><p>Bấm "+ Thêm kênh" để thêm vào registry</p></div>';return;}
+  const lvMap={alive:'tag-green',dead:'tag-red',no_access:'tag-amber',unknown:'tag-muted'};
+  el.innerHTML=`<div class="table-wrap"><table class="tbl"><thead><tr><th>ID / Link</th><th>Tên</th><th>Liveness</th><th></th></tr></thead><tbody>${list.map(c=>`<tr><td><code>${esc(c.raw)}</code></td><td>${esc(c.title)}</td><td><span class="tag ${lvMap[c.liveness]||'tag-muted'}">${esc(c.liveness)}</span></td><td><button class="btn btn-ghost btn-mini" onclick="chCheck(${c.id})">🔍</button><button class="btn btn-ghost btn-mini" onclick="chDel(${c.id})">✕</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+function chCheck(id){
+  const c=state.channels.find(x=>x.id===id);
+  if(!c) return;
+  c.liveness='alive';
+  renderChannels();
+  toast('Kênh alive','ok');
+}
+function chDel(id){
+  state.channels=state.channels.filter(x=>x.id!==id);
+  document.getElementById('nc-channels').textContent=state.channels.length;
+  document.getElementById('st-channels').textContent=state.channels.length;
+  renderChannels();
+  toast('Đã xóa kênh','warn');
+}
+
+// ─── USERBOT ─────────────────────────────────────────────────────────────────
+function ubSaveConfig(){
+  const apiId=document.getElementById('ubApiId').value.trim();
+  const apiHash=document.getElementById('ubApiHash').value.trim();
+  if(!apiId||!apiHash){toast('Cần nhập API ID và API Hash','err');return;}
+  document.getElementById('ubApiHash').value='';
+  toast('Đã lưu cấu hình API (mã hoá AES-256)','ok');
+  addLog('API config saved','ok');
+}
+function ubSendCode(){
+  const phone=document.getElementById('ubPhone').value.trim();
+  if(!/^\+\d{7,15}$/.test(phone)){toast('Số điện thoại không hợp lệ (vd: +66812345678)','err');return;}
+  document.getElementById('stepPhone').style.display='none';
+  document.getElementById('stepOtp').style.display='';
+  document.getElementById('ubSendBtn').style.display='none';
+  document.getElementById('ubConfirmBtn').disabled=false;
+  toast('Đã gửi OTP về Telegram','ok');
+  addLog('OTP sent to '+phone.slice(0,4)+'***','ok');
+}
+function ubConfirm(){
+  const otp=document.getElementById('ubOtp')?.value.trim();
+  if(!otp){toast('Nhập mã OTP','err');return;}
+  // Simulate login
+  document.getElementById('stepOtp').style.display='none';
+  document.getElementById('ubToolbar').style.display='none';
+  document.getElementById('ubLoggedCard').style.display='flex';
+  document.getElementById('ubName').textContent='@admin_user';
+  document.getElementById('ubMeta').textContent='+66•••••';
+  document.getElementById('ubStatusBlock').innerHTML='<span><strong>Trạng thái</strong> <span class="badge ready">Đã kết nối</span></span>';
+  document.getElementById('st-bot').textContent='Connected';
+  document.getElementById('st-bot').style.color='var(--green)';
+  document.getElementById('topbarLabel').textContent='Live @admin_user';
+  document.getElementById('topbarStatus').className='live';
+  toast('Đã đăng nhập userbot','ok');
+  addLog('Userbot logged in','ok');
+  try{lucide.createIcons()}catch(e){}
+}
+function ubLogout(){
+  document.getElementById('ubLoggedCard').style.display='none';
+  document.getElementById('stepPhone').style.display='';
+  document.getElementById('stepOtp').style.display='none';
+  document.getElementById('ubToolbar').style.display='flex';
+  document.getElementById('ubSendBtn').style.display='';
+  document.getElementById('ubConfirmBtn').disabled=true;
+  document.getElementById('ubStatusBlock').innerHTML='<span><strong>Trạng thái</strong> <span class="badge off">Chưa đăng nhập</span></span>';
+  document.getElementById('st-bot').textContent='Offline';
+  document.getElementById('st-bot').style.color='var(--amber)';
+  toast('Đã đăng xuất userbot','warn');
+}
+function ubRelogin(){ ubLogout(); document.getElementById('ubPhone').value=''; }
+
+// ─── BOTS ────────────────────────────────────────────────────────────────────
+function openAddBot(){ document.getElementById('addBotModal').classList.add('open'); }
+function closeAddBot(){ document.getElementById('addBotModal').classList.remove('open'); }
+function submitAddBot(){
+  const name=document.getElementById('botName').value.trim();
+  const token=document.getElementById('botToken').value.trim();
+  if(!name||!token){toast('Cần nhập tên và token','err');return;}
+  const fp='...'+token.slice(-4);
+  state.bots.push({id:Date.now(),name,fp,username:'@bot_'+name.toLowerCase().replace(/\s/g,'_')});
+  renderBots();
+  document.getElementById('botName').value='';
+  document.getElementById('botToken').value='';
+  closeAddBot();
+  toast('Đã thêm bot: '+name,'ok');
+  addLog('Bot added: '+name,'ok');
+}
+function renderBots(){
+  const el=document.getElementById('botCredList');
+  if(!state.bots.length){el.innerHTML='<div class="empty-state"><div class="icon-big">🤖</div><h4>Chưa có bot nào</h4><p>Bấm "+ Thêm bot" để thêm token</p></div>';return;}
+  el.innerHTML=`<div class="table-wrap"><table class="tbl"><thead><tr><th>Tên</th><th>Username</th><th>Token</th><th></th></tr></thead><tbody>${state.bots.map(b=>`<tr><td>${esc(b.name)}</td><td>${esc(b.username)}</td><td><code style="font-size:11px">${esc(b.fp)}</code></td><td><button class="btn btn-danger btn-mini" onclick="delBot(${b.id})">✕ Xóa</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+function delBot(id){ state.bots=state.bots.filter(b=>b.id!==id); renderBots(); toast('Đã xóa bot','warn'); }
+
+// ─── BACKUP ──────────────────────────────────────────────────────────────────
+const backups=[];
+function backupNow(){
+  const ts=new Date().toISOString().slice(0,19).replace('T','_').replace(/:/g,'');
+  const b={id:Date.now(),filename:`upbain_backup_${ts}.zip`,size:'—',created:new Date().toLocaleString('vi-VN')};
+  backups.unshift(b);
+  renderBackups();
+  toast('Backup tạo thành công: '+b.filename,'ok');
+  addLog('Backup created: '+b.filename,'ok');
+}
+function loadBackups(){ renderBackups(); }
+function renderBackups(){
+  const el=document.getElementById('backupList');
+  if(!backups.length){el.innerHTML='<div class="empty-state"><div class="icon-big">📦</div><h4>Chưa có backup nào</h4></div>';return;}
+  el.innerHTML=`<div class="table-wrap"><table class="tbl"><thead><tr><th>File</th><th>Thời gian</th><th></th></tr></thead><tbody>${backups.map(b=>`<tr><td><code style="font-size:12px">${esc(b.filename)}</code></td><td style="color:var(--muted);font-size:12px">${esc(b.created)}</td><td><button class="btn btn-secondary btn-mini">⬇</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+function dropFile(e){
+  e.preventDefault();
+  const f=e.dataTransfer.files[0];
+  if(!f) return;
+  toast('Đã nhận file: '+f.name+' — nhấn Preview để xem','ok');
+}
+
+// ─── ANTIFLOOD SIMULATOR ─────────────────────────────────────────────────────
+let afTimer=null, afDone=false;
+function afStart(){
+  if(afTimer) return;
+  afDone=false;
+  const dur=parseInt(document.getElementById('afDur').value)||10;
+  const rate=parseInt(document.getElementById('afRate').value)||5;
+  let req=0,ok=0,flood=0,elapsed=0;
+  document.getElementById('afStartBtn').disabled=true;
+  document.getElementById('afStopBtn').disabled=false;
+  afLog('Simulation started — rate='+rate+'req/s dur='+dur+'s');
+  afTimer=setInterval(()=>{
+    if(afDone){clearInterval(afTimer);afTimer=null;return;}
+    elapsed+=200;
+    const step=Math.round(rate*0.2);
+    req+=step;
+    const fl=Math.random()<0.08?1:0;
+    flood+=fl; ok+=(step-fl);
+    document.getElementById('af-req').textContent=req;
+    document.getElementById('af-ok').textContent=ok;
+    document.getElementById('af-flood').textContent=flood;
+    document.getElementById('af-progress').style.width=Math.min(elapsed/dur/10,100)+'%';
+    if(fl) afLog('FloodWait 30s — waiting...','warn');
+    if(elapsed>=dur*1000){ clearInterval(afTimer);afTimer=null;document.getElementById('afStartBtn').disabled=false;document.getElementById('afStopBtn').disabled=true;afLog('Simulation complete — req='+req+' flood='+flood,'ok'); }
+  },200);
+}
+function afStop(){ afDone=true; document.getElementById('afStartBtn').disabled=false; document.getElementById('afStopBtn').disabled=true; if(afTimer){clearInterval(afTimer);afTimer=null;} afLog('Simulation stopped','warn'); }
+function afLog(msg,type='info'){
+  const el=document.getElementById('af-log');
+  const d=document.createElement('div');
+  d.className='log-line '+(type||'info');
+  const ts=new Date().toTimeString().slice(0,8);
+  d.innerHTML=`<span class="ts">${ts}</span><span class="msg">${esc(msg)}</span>`;
+  el.appendChild(d);
+  el.scrollTop=el.scrollHeight;
+}
+
+// ─── LOG ─────────────────────────────────────────────────────────────────────
+function addLog(msg,type='info'){
+  const el=document.getElementById('logList');
+  if(!el) return;
+  const d=document.createElement('div');
+  d.className='log-line '+(type||'info');
+  const ts=new Date().toTimeString().slice(0,8);
+  d.innerHTML=`<span class="ts">${ts}</span><span class="msg">${esc(msg)}</span>`;
+  el.appendChild(d);
+  el.scrollTop=el.scrollHeight;
+}
+function clearLogs(){
+  const el=document.getElementById('logList');
+  if(el) el.innerHTML='';
+  toast('Đã xóa log','warn');
+}
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+function toast(msg,type='info',dur=4000){
+  const box=document.getElementById('toastBox');
+  const item=document.createElement('div');
+  item.className='toast-item '+(type==='ok'?'ok':type==='err'?'err':'');
+  const msgEl=document.createElement('span');
+  msgEl.className='toast-msg';
+  msgEl.textContent=msg;
+  const closeEl=document.createElement('button');
+  closeEl.className='toast-close';
+  closeEl.textContent='×';
+  closeEl.onclick=()=>dismiss(item);
+  item.appendChild(msgEl); item.appendChild(closeEl);
+  box.appendChild(item);
+  if(dur>0) setTimeout(()=>dismiss(item),dur);
+}
+function dismiss(el){ el.style.opacity='0'; el.style.transform='translateY(6px)'; el.style.transition='all .2s'; setTimeout(()=>el.remove(),200); }
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ─── AUTO LOGIN FOR DEMO ──────────────────────────────────────────────────────
+// Pre-fill login form
+document.getElementById('loginUser').value='admin';
+document.getElementById('loginPass').value='changeme';
+</script>
+</body>
+</html>
