@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minecraft Lệnh VIP PRO MAX — Tổng Hợp 5000+ Lệnh Cheat</title>
+  <title>Cẩm Nang Minecraft Cheat Mode — Hơn 50.000 Lệnh</title>
   <style>
     :root {
       --bg: #0a0a12;
@@ -51,6 +51,20 @@
       padding: .5rem 1.2rem; font-size: .9rem;
     }
     .stat b { color: var(--gold); }
+    .hero-actions {
+      display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem;
+    }
+    .hero-action {
+      padding: .55rem .9rem; border-radius: 6px; border: 1px solid var(--border);
+      background: rgba(18,18,31,.8); color: var(--text); text-decoration: none;
+      font-size: .82rem; cursor: pointer;
+    }
+    .hero-action:hover { border-color: var(--gold); color: var(--gold); }
+    .profile-note {
+      max-width: 1050px; margin: 1rem auto 0; padding: .75rem 1rem;
+      border: 1px solid rgba(0,212,255,.35); border-radius: 8px;
+      background: rgba(0,212,255,.07); color: #bfefff; font-size: .82rem;
+    }
     .layout {
       display: grid;
       grid-template-columns: 280px 1fr;
@@ -96,6 +110,7 @@
       font-size: .7rem; text-transform: uppercase; letter-spacing: .08em;
       color: var(--gold-dim); margin-bottom: .4rem;
     }
+    .toc-group + .toc-group { border-top: 1px solid var(--border); padding-top: .8rem; }
     .toc-link {
       display: block; padding: .35rem .5rem; font-size: .82rem;
       color: var(--muted); text-decoration: none; border-radius: 4px;
@@ -213,12 +228,24 @@
 <body>
 
 <div class="hero">
-  <h1>⚔️ MINECRAFT LỆNH VIP PRO MAX ⚔️</h1>
-  <p>Tổng hợp lệnh cheat vui chơi · Map thường · Mod tận thế · Command Block</p>
+  <h1>⚔️ CẨM NANG MINECRAFT CHEAT MODE ⚔️</h1>
+  <p>Thư viện lệnh chuyên nghiệp · Map thường · Mod tận thế · Command Block</p>
   <div class="stats">
     <div class="stat">Tổng lệnh: <b id="total-count">...</b></div>
     <div class="stat">Đang hiện: <b id="shown-count">...</b></div>
-    <div class="stat">Phiên bản: <b>Java 1.20.1 – 1.21</b></div>
+    <div class="stat">Hồ sơ chính: <b>Java 1.20.1 Forge</b></div>
+    <div class="stat">Danh mục: <b id="section-count">...</b></div>
+  </div>
+  <div class="hero-actions">
+    <a class="hero-action" href="#huong-dan">🚀 Bắt đầu</a>
+    <a class="hero-action" href="#give-vu-khi">⚔️ Trang bị</a>
+    <a class="hero-action" href="#summon-quai">🧟 Triệu hồi</a>
+    <a class="hero-action" href="#xay-dung">🏗️ Xây dựng</a>
+    <a class="hero-action" href="#guard-villagers">🛡️ Guard Villagers</a>
+  </div>
+  <div class="profile-note">
+    <b>Quan trọng:</b> Modpack của bạn dùng Java 1.20.1. Lệnh gắn nhãn 1.21 dùng cú pháp
+    <code>components</code> và không chạy trên 1.20.1. Trong khối lệnh hãy bỏ dấu <code>/</code> đầu dòng.
   </div>
 </div>
 
@@ -238,43 +265,43 @@
 </div>
 
 <footer>
-  Minecraft Lệnh VIP PRO MAX · Style execute / summon / give · Dùng cho mục đích vui chơi singleplayer / server riêng
+  Cẩm Nang Minecraft Cheat Mode · Java 1.20.1 Forge là hồ sơ chính · Hãy sao lưu world trước khi chạy lệnh diện rộng
 </footer>
 
 <script>
 // ============================================================
-//  COMMAND GENERATOR — 5000+ lệnh Minecraft VIP style
+//  COMMAND GENERATOR — 50,000+ lệnh Minecraft Cheat Mode
 // ============================================================
 
 const USER_UUID = '6fac357c-1d75-3c23-ace8-9f68a0da7efb';
 
 const SECTIONS = [
-  { id: 'huong-dan', title: '📖 Hướng Dẫn Cơ Bản', gen: genGuide },
-  { id: 'command-block', title: '🟣 Khối Lệnh & Công Cụ', gen: genCommandBlock },
-  { id: 'gamemode', title: '🎮 Gamemode & Cheat', gen: genGamemode },
-  { id: 'give-vu-khi', title: '⚔️ Give Vũ Khí VIP', gen: genWeapons },
-  { id: 'give-giap', title: '🛡️ Give Giáp VIP', gen: genArmor },
-  { id: 'give-do', title: '🎁 Give Đồ Hữu Ích', gen: genItems },
-  { id: 'summon-quai', title: '🧟 Summon Quái VIP', gen: genMobs },
-  { id: 'summon-boss', title: '👹 Boss & Quái Khổng Lồ', gen: genBosses },
-  { id: 'summon-thu', title: '🐺 Thú Cưng & Sói VIP', gen: genPets },
-  { id: 'summon-dan-lang', title: '🏘️ Dân Làng & NPC', gen: genVillagers },
-  { id: 'guard-villagers', title: '🛡️ Guard Villagers (Mod)', gen: genGuards },
-  { id: 'tacz-sung', title: '🔫 TaCZ Súng (Mod)', gen: genTacz },
-  { id: 'golem', title: '🤖 Golem & Hộ Vệ', gen: genGolems },
-  { id: 'effect', title: '✨ Hiệu Ứng Buff', gen: genEffects },
-  { id: 'teleport', title: '🌀 Teleport & Di Chuyển', gen: genTeleport },
-  { id: 'xay-dung', title: '🏗️ Xây Dựng & Fill', gen: genBuild },
-  { id: 'thoi-tiet', title: '🌦️ Thời Tiết & Thời Gian', gen: genWeather },
-  { id: 'combat', title: '💀 Kill & Dọn Map', gen: genCombat },
-  { id: 'scoreboard', title: '📊 Scoreboard & Lặp', gen: genScoreboard },
-  { id: 'fun', title: '🎉 Lệnh Vui & Troll', gen: genFun },
-  { id: 'attribute', title: '💪 Buff Attribute', gen: genAttributes },
-  { id: 'data-modify', title: '🔧 Data Modify Nâng Cao', gen: genDataModify },
-  { id: 'blocks-give', title: '🧱 Give Block & Vật Liệu', gen: genBlocks },
-  { id: 'mega-summon', title: '🌟 Mega Summon (Biến Thể)', gen: genMegaSummon },
-  { id: 'enchant-all', title: '✨ Phù Phép Toàn Bộ', gen: genEnchantAll },
-  { id: 'fill-mega', title: '🏰 Fill Mega (Đa Vật Liệu)', gen: genFillMega },
+  { group: '01 · Bắt đầu', id: 'huong-dan', title: '📖 Hướng Dẫn Cơ Bản', gen: genGuide },
+  { group: '01 · Bắt đầu', id: 'command-block', title: '🟣 Khối Lệnh & Công Cụ', gen: genCommandBlock },
+  { group: '01 · Bắt đầu', id: 'gamemode', title: '🎮 Gamemode & Luật Chơi', gen: genGamemode },
+  { group: '02 · Người chơi', id: 'give-do', title: '🎁 Đồ Hữu Ích', gen: genItems },
+  { group: '02 · Người chơi', id: 'give-vu-khi', title: '⚔️ Vũ Khí VIP', gen: genWeapons },
+  { group: '02 · Người chơi', id: 'give-giap', title: '🛡️ Giáp VIP', gen: genArmor },
+  { group: '02 · Người chơi', id: 'enchant-all', title: '✨ Ma Trận Phù Phép', gen: genEnchantAll },
+  { group: '02 · Người chơi', id: 'effect', title: '✨ Hiệu Ứng & Buff', gen: genEffects },
+  { group: '02 · Người chơi', id: 'attribute', title: '💪 Thuộc Tính', gen: genAttributes },
+  { group: '02 · Người chơi', id: 'teleport', title: '🌀 Dịch Chuyển', gen: genTeleport },
+  { group: '03 · Thế giới', id: 'thoi-tiet', title: '🌦️ Thời Tiết & Thời Gian', gen: genWeather },
+  { group: '03 · Thế giới', id: 'blocks-give', title: '🧱 Block & Vật Liệu', gen: genBlocks },
+  { group: '03 · Thế giới', id: 'xay-dung', title: '🏗️ Công Trình Nhanh', gen: genBuild },
+  { group: '03 · Thế giới', id: 'fill-mega', title: '🏰 Ma Trận Fill', gen: genFillMega },
+  { group: '04 · Sinh vật', id: 'summon-quai', title: '🧟 Quái VIP', gen: genMobs },
+  { group: '04 · Sinh vật', id: 'mega-summon', title: '🌟 Ma Trận Triệu Hồi', gen: genMegaSummon },
+  { group: '04 · Sinh vật', id: 'summon-boss', title: '👹 Boss & Quái Khổng Lồ', gen: genBosses },
+  { group: '04 · Sinh vật', id: 'summon-thu', title: '🐺 Thú Cưng', gen: genPets },
+  { group: '04 · Sinh vật', id: 'summon-dan-lang', title: '🏘️ Dân Làng & NPC', gen: genVillagers },
+  { group: '04 · Sinh vật', id: 'golem', title: '🤖 Golem & Hộ Vệ', gen: genGolems },
+  { group: '05 · Mod tận thế', id: 'guard-villagers', title: '🛡️ Guard Villagers', gen: genGuards },
+  { group: '05 · Mod tận thế', id: 'tacz-sung', title: '🔫 TaCZ Súng & Đạn', gen: genTacz },
+  { group: '06 · Quản trị', id: 'combat', title: '💀 Kill & Dọn Map', gen: genCombat },
+  { group: '06 · Quản trị', id: 'scoreboard', title: '📊 Scoreboard & Vòng Lặp', gen: genScoreboard },
+  { group: '06 · Quản trị', id: 'data-modify', title: '🔧 Data Modify', gen: genDataModify },
+  { group: '07 · Giải trí', id: 'fun', title: '🎉 Lệnh Vui & Troll', gen: genFun },
 ];
 
 function cmd(title, command, opts = {}) {
@@ -284,7 +311,7 @@ function cmd(title, command, opts = {}) {
     desc: opts.desc || '',
     usage: opts.usage || 'Dán vào chat (F3+C copy) hoặc khối lệnh tím Repeat',
     type: opts.type || 'both',
-    version: opts.version || '1.20.1+',
+    version: opts.version || '1.20.1',
     tags: opts.tags || [],
   };
 }
@@ -734,6 +761,7 @@ function genWeather() {
 function genCombat() {
   const cmds = [];
   cmds.push(cmd('Kill tất cả trừ player', `kill @e[type=!player]`, { type: 'chat', desc: 'Xóa mọi entity — kể cả Invulnerable.', tags: ['kill'] }));
+  cmds.push(cmd('Kill riêng mob Cheat Mode', `kill @e[tag=cheat_mode]`, { type: 'chat', desc: 'Cách dọn an toàn các mob tạo từ mục Ma Trận Triệu Hồi.', tags: ['kill','cheat_mode'] }));
   cmds.push(cmd('Kill zombie', `kill @e[type=zombie]`, { type: 'chat', tags: ['kill'] }));
   cmds.push(cmd('Kill skeleton', `kill @e[type=skeleton]`, { type: 'chat', tags: ['kill'] }));
   cmds.push(cmd('Kill guard', `kill @e[type=guardvillagers:guard]`, { type: 'chat', tags: ['kill','mod'] }));
@@ -855,6 +883,17 @@ function genMegaSummon() {
     'wolf','cat','horse','iron_golem','snow_golem','bee','fox','polar_bear','goat',
   ];
   const colors = ['red','gold','green','blue','aqua','purple','white','dark_red','yellow','dark_green'];
+  const positions = [
+    { label: 'tại chỗ', xyz: '~ ~1 ~' },
+    { label: 'Đông 10', xyz: '~10 ~ ~' },
+    { label: 'Đông 50', xyz: '~50 ~ ~' },
+    { label: 'trên cao 10', xyz: '~ ~10 ~' },
+    { label: 'vòng đấu', xyz: '~20 ~ ~20' },
+  ];
+  const behaviors = [
+    { label: 'AI', nbt: 'NoAI:0b' },
+    { label: 'Đứng yên', nbt: 'NoAI:1b' },
+  ];
   const tiers = [
     { label: 'VIP I', hp: 256, dmg: 100 },
     { label: 'VIP II', hp: 512, dmg: 300 },
@@ -865,8 +904,21 @@ function genMegaSummon() {
   mobs.forEach(mob => {
     colors.forEach(color => {
       tiers.forEach(t => {
-        const name = mob.toUpperCase().replace(/_/g, ' ');
-        cmds.push(cmd(`${name} ${t.label} [${color}]`, `execute at @p run summon minecraft:${mob} ~ ~1 ~ {CustomName:'${jsonName(name + ' ' + t.label, color, { bold: true })}',CustomNameVisible:1b,Health:${t.hp}f,Attributes:[{Name:"generic.max_health",Base:${t.hp}f},{Name:"generic.attack_damage",Base:${t.dmg}f}],Invulnerable:1b,PersistenceRequired:1b}`, { type: 'both', desc: `${mob} ${t.label} — ${t.hp}HP / ${t.dmg} dmg.`, tags: [mob, 'mega', color] }));
+        positions.forEach(pos => {
+          behaviors.forEach(behavior => {
+            const name = mob.toUpperCase().replace(/_/g, ' ');
+            cmds.push(cmd(
+              `${name} ${t.label} · ${color} · ${pos.label} · ${behavior.label}`,
+              `execute at @p run summon minecraft:${mob} ${pos.xyz} {Tags:["cheat_mode"],CustomName:'${jsonName(name + ' ' + t.label, color, { bold: true })}',CustomNameVisible:1b,Health:${t.hp}f,Attributes:[{Name:"generic.max_health",Base:${t.hp}f},{Name:"generic.attack_damage",Base:${t.dmg}f}],Invulnerable:1b,PersistenceRequired:1b,${behavior.nbt}}`,
+              {
+                type: 'both',
+                desc: `${mob} ${t.label}: ${t.hp} HP, ${t.dmg} sát thương; ${pos.label}; ${behavior.label}. Tag cheat_mode giúp xóa nhanh.`,
+                usage: 'Chat: giữ dấu / · Khối lệnh: bỏ dấu / đầu dòng',
+                tags: [mob, 'mega', color, behavior.label, pos.label]
+              }
+            ));
+          });
+        });
       });
     });
   });
@@ -890,10 +942,27 @@ function genEnchantAll() {
     'loyalty','impaling','riptide','channeling',
     'protection','thorns','feather_falling','blast_protection','projectile_protection','fire_protection',
   ];
+  const targets = [
+    { id: '@s', label: 'bản thân' },
+    { id: '@p', label: 'người gần nhất' },
+    { id: '@a', label: 'mọi người' },
+  ];
+  const levels = [1, 2, 3, 4, 5, 10, 25, 50, 100, 255];
   tools.forEach(tool => {
     enchants.forEach(ench => {
-      [1, 2, 3, 4, 5].forEach(lvl => {
-        cmds.push(cmd(`${tool} + ${ench} ${lvl}`, `give @s minecraft:${tool}{Enchantments:[{id:"${ench}",lvl:${lvl}s}],Unbreakable:1b} 1`, { type: 'chat', desc: `${tool} phù phép ${ench} ${lvl}.`, tags: [tool, ench] }));
+      levels.forEach(lvl => {
+        targets.forEach(target => {
+          cmds.push(cmd(
+            `${tool} + ${ench} ${lvl} → ${target.label}`,
+            `give ${target.id} minecraft:${tool}{Enchantments:[{id:"${ench}",lvl:${lvl}s}],Unbreakable:1b} 1`,
+            {
+              type: 'chat',
+              desc: `Ép ${ench} cấp ${lvl} lên ${tool} cho ${target.label}. Cặp enchant không tương thích vẫn có thể hiện trên item nhưng hiệu ứng tùy cơ chế Minecraft.`,
+              usage: 'Chạy trong Java 1.20.1; cấp 255 có thể gây mất cân bằng',
+              tags: [tool, ench, target.label, lvl >= 10 ? 'overpowered' : 'vanilla']
+            }
+          ));
+        });
       });
     });
   });
@@ -912,11 +981,30 @@ function genFillMega() {
   ];
   const patterns = ['hollow','outline','replace','destroy'];
   const sizes = [3, 5, 7, 10, 15, 20, 25, 30, 40, 50];
+  const heightRatios = [
+    { label: 'thấp', ratio: .2 },
+    { label: 'nửa', ratio: .5 },
+    { label: 'vuông', ratio: 1 },
+    { label: 'tháp x2', ratio: 2 },
+    { label: 'tháp x3', ratio: 3 },
+    { label: 'siêu tháp x5', ratio: 5 },
+  ];
   mats.forEach(mat => {
     sizes.forEach(s => {
-      patterns.forEach(pat => {
-        const h = Math.max(3, Math.floor(s / 2));
-        cmds.push(cmd(`Fill ${mat} ${s}x${h} [${pat}]`, `fill ~ ~ ~ ~${s} ~${h} ~${s} ${mat} ${pat}`, { type: 'both', desc: `Khối ${mat} ${s}x${h} kiểu ${pat}.`, tags: ['fill', mat, pat] }));
+      heightRatios.forEach(height => {
+        patterns.forEach(pat => {
+          const h = Math.max(1, Math.floor(s * height.ratio));
+          cmds.push(cmd(
+            `Fill ${mat} ${s}×${h}×${s} · ${height.label} · ${pat}`,
+            `fill ~ ~ ~ ~${s} ~${h} ~${s} minecraft:${mat} ${pat}`,
+            {
+              type: 'both',
+              desc: `Công trình ${mat}, rộng ${s}, cao ${h}, chế độ ${pat}.`,
+              usage: s * s * h > 32768 ? '⚠️ Có thể vượt giới hạn 32.768 block; giảm kích thước hoặc chia thành nhiều lệnh' : 'Đứng tại một góc công trình rồi chạy',
+              tags: ['fill', mat, pat, height.label]
+            }
+          ));
+        });
       });
       cmds.push(cmd(`Sàn ${mat} ${s}x${s}`, `fill ~ ~-1 ~ ~${s} ~-1 ~${s} ${mat}`, { type: 'both', tags: ['fill'] }));
       cmds.push(cmd(`Trần ${mat} ${s}x${s}`, `fill ~ ~${s} ~ ~${s} ~${s} ~${s} ${mat}`, { type: 'both', tags: ['fill'] }));
@@ -962,17 +1050,26 @@ function buildAllCommands() {
 
 function renderTOC() {
   const toc = document.getElementById('toc');
-  toc.innerHTML = SECTIONS.map(s => {
-    const count = ALL_COMMANDS.filter(c => c.sectionId === s.id).length;
-    return `<div class="toc-group">
-      <h3>${s.title.split(' ').slice(1).join(' ') || s.title}</h3>
-      <a class="toc-link" data-section="${s.id}">${s.title} <span style="opacity:.5">(${count})</span></a>
-    </div>`;
-  }).join('');
+  const groups = new Map();
+  SECTIONS.forEach(section => {
+    if (!groups.has(section.group)) groups.set(section.group, []);
+    groups.get(section.group).push(section);
+  });
+  toc.innerHTML = [...groups.entries()].map(([group, sections]) => `
+    <div class="toc-group">
+      <h3>${group}</h3>
+      ${sections.map(section => {
+        const count = ALL_COMMANDS.filter(c => c.sectionId === section.id).length;
+        return `<a class="toc-link" data-section="${section.id}">${section.title} <span style="opacity:.5">(${count.toLocaleString('vi-VN')})</span></a>`;
+      }).join('')}
+    </div>
+  `).join('');
 
   toc.querySelectorAll('.toc-link').forEach(link => {
     link.addEventListener('click', () => {
-      document.getElementById(link.dataset.section).scrollIntoView({ behavior: 'smooth' });
+      const section = document.getElementById(link.dataset.section);
+      if (!section) return;
+      section.scrollIntoView({ behavior: 'smooth' });
       toc.querySelectorAll('.toc-link').forEach(l => l.classList.remove('active'));
       link.classList.add('active');
     });
@@ -1009,6 +1106,10 @@ function renderCmdCard(c) {
 
 function renderSections(commands) {
   const content = document.getElementById('content');
+  if (!commands.length) {
+    content.innerHTML = '<div class="no-result"><h2>Không tìm thấy lệnh</h2><p>Thử từ khóa ngắn hơn như “zombie”, “guard”, “give” hoặc “fill”.</p></div>';
+    return;
+  }
   const bySection = {};
   commands.forEach(c => {
     if (!bySection[c.sectionId]) bySection[c.sectionId] = [];
@@ -1022,13 +1123,31 @@ function renderSections(commands) {
     const initial = cmds.slice(0, PAGE_SIZE);
     const guide = sec.id === 'huong-dan' ? `
       <div class="guide-card">
-        <h4>📌 Cách dùng nhanh</h4>
+        <h4>🚀 Quy trình Cheat Mode chuẩn</h4>
         <ul>
-          <li><b>Chat:</b> Mở chat (T), dán lệnh, Enter — cần bật cheat/op.</li>
-          <li><b>Khối lệnh:</b> <code>/give @s command_block</code> → đặt khối → mở → dán lệnh (không cần / đầu dòng).</li>
-          <li><b>Repeat tím:</b> Repeat + Need Redstone → gắn Lever → gạt 1-2 giây → tắt ngay.</li>
+          <li><b>1.</b> Bật Allow Cheats hoặc Open to LAN → Allow Cheats: ON.</li>
+          <li><b>2.</b> Chạy <code>/gamerule keepInventory true</code> và lấy khối lệnh.</li>
+          <li><b>3.</b> Thử lệnh một lần trong chat trước khi đưa vào Repeat.</li>
+          <li><b>4.</b> Gắn tag riêng cho quân/quái để có thể xóa chính xác.</li>
+          <li><b>5.</b> Tạo bản sao world trước khi dùng fill, kill diện rộng hoặc spawn hàng loạt.</li>
+        </ul>
+      </div>
+      <div class="guide-card">
+        <h4>⌨️ Chat và khối lệnh</h4>
+        <ul>
+          <li><b>Chat:</b> Mở bằng T, giữ dấu <code>/</code>, dán rồi Enter — cần cheat/op.</li>
+          <li><b>Khối lệnh:</b> <code>/give @s command_block</code> → đặt → mở → dán lệnh và bỏ dấu <code>/</code>.</li>
+          <li><b>Repeat tím:</b> Repeat + Need Redstone → gắn Lever → chỉ gạt 1–2 giây.</li>
           <li><b>@p</b> = người chơi gần nhất · <b>@s</b> = vị trí khối lệnh/entity · <b>~</b> = tọa độ tương đối.</li>
-          <li><b>1.20.1</b> dùng <code>Enchantments:[{id:"protection",lvl:4s}]</code> · <b>1.21</b> dùng <code>components</code>.</li>
+        </ul>
+      </div>
+      <div class="guide-card">
+        <h4>🧯 Phục hồi khi lag</h4>
+        <ul>
+          <li>Tắt cần gạt Repeat trước, sau đó dùng <code>/kill @e[tag=cheat_mode]</code>.</li>
+          <li>Dọn rác bằng <code>/kill @e[type=item]</code> và tên/mũi tên bằng selector đúng loại.</li>
+          <li>Không dùng <code>/kill @e[type=!player]</code> nếu muốn giữ thú nuôi, giáp đứng, thuyền và NPC.</li>
+          <li><b>1.20.1:</b> NBT item cũ dùng <code>Count</code>/<code>tag</code>. <b>1.21:</b> item stack dùng <code>count</code>/<code>components</code>.</li>
         </ul>
       </div>` : '';
 
@@ -1054,19 +1173,21 @@ function renderSections(commands) {
 }
 
 function bindEvents() {
-  document.querySelectorAll('.copy-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+  const content = document.getElementById('content');
+  content.onclick = event => {
+    const btn = event.target.closest('.copy-btn');
+    if (btn) {
       const text = decodeURIComponent(btn.dataset.cmd);
       navigator.clipboard.writeText(text).then(() => {
         btn.textContent = '✅ Đã copy!';
         btn.classList.add('copied');
         setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2000);
       });
-    });
-  });
-
-  document.querySelectorAll('.load-more').forEach(btn => {
-    btn.addEventListener('click', () => {
+      return;
+    }
+    const loadButton = event.target.closest('.load-more');
+    if (loadButton) {
+      const btn = loadButton;
       const sid = btn.dataset.section;
       const all = window['_cmds_' + sid] || [];
       const list = document.getElementById('list-' + sid);
@@ -1075,13 +1196,12 @@ function bindEvents() {
       next.forEach(c => {
         list.insertAdjacentHTML('beforeend', renderCmdCard(c));
       });
-      bindEvents();
       const remaining = all.length - list.querySelectorAll('.cmd-card').length;
       if (remaining <= 0) btn.remove();
       else btn.textContent = `Xem thêm ${Math.min(PAGE_SIZE, remaining)} / ${remaining} lệnh còn lại ↓`;
       updateShownCount();
-    });
-  });
+    }
+  };
 }
 
 function filterCommands(query, typeFilter) {
@@ -1102,6 +1222,7 @@ function updateShownCount() {
 function init() {
   ALL_COMMANDS = buildAllCommands();
   document.getElementById('total-count').textContent = ALL_COMMANDS.length.toLocaleString();
+  document.getElementById('section-count').textContent = SECTIONS.length.toLocaleString();
   renderTOC();
   renderSections(ALL_COMMANDS);
   updateShownCount();
