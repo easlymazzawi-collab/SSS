@@ -1411,9 +1411,10 @@ function bindEvents() {
 function filterCommands(query, typeFilter) {
   query = query.toLowerCase().trim();
   return ALL_COMMANDS.filter(c => {
+    const isChatOrBlockMatch = c.type === 'both' && ['chat', 'block'].includes(typeFilter);
     const matchType = typeFilter === 'all'
       || c.type === typeFilter
-      || c.type === 'both'
+      || isChatOrBlockMatch
       || (typeFilter === 'mod' && ((c.version || '').includes('Mod') || c.tags.includes('mod')));
     const haystack = (c.title + ' ' + c.command + ' ' + c.desc + ' ' + c.tags.join(' ')).toLowerCase();
     const matchQuery = !query || haystack.includes(query);
