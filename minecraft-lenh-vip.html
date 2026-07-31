@@ -31,53 +31,58 @@
     .hero {
       background: linear-gradient(135deg, #1a0a2e 0%, #0a1628 50%, #0a2818 100%);
       border-bottom: 2px solid var(--gold);
-      padding: 2rem;
+      padding: 1.15rem 1.5rem;
       text-align: center;
     }
     .hero h1 {
-      font-size: clamp(1.4rem, 4vw, 2.4rem);
+      font-size: clamp(1.25rem, 3vw, 1.8rem);
       background: linear-gradient(90deg, var(--gold), #fff, var(--gold));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       text-shadow: 0 0 30px rgba(255,215,0,.3);
     }
-    .hero p { color: var(--muted); margin-top: .5rem; }
+    .hero p { color: var(--muted); margin-top: .25rem; font-size: .88rem; }
     .stats {
-      display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem;
+      display: flex; gap: .55rem; justify-content: center; flex-wrap: wrap; margin-top: .7rem;
     }
     .stat {
       background: var(--panel2); border: 1px solid var(--border); border-radius: 8px;
-      padding: .5rem 1.2rem; font-size: .9rem;
+      padding: .35rem .75rem; font-size: .78rem;
     }
     .stat b { color: var(--gold); }
     .hero-actions {
-      display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem;
+      display: flex; gap: .4rem; justify-content: center; flex-wrap: wrap; margin-top: .65rem;
     }
     .hero-action {
-      padding: .55rem .9rem; border-radius: 6px; border: 1px solid var(--border);
+      padding: .4rem .7rem; border-radius: 6px; border: 1px solid var(--border);
       background: rgba(18,18,31,.8); color: var(--text); text-decoration: none;
       font-size: .82rem; cursor: pointer;
     }
     .hero-action:hover { border-color: var(--gold); color: var(--gold); }
     .profile-note {
-      max-width: 1050px; margin: 1rem auto 0; padding: .75rem 1rem;
+      max-width: 900px; margin: .65rem auto 0; padding: .5rem .75rem;
       border: 1px solid rgba(0,212,255,.35); border-radius: 8px;
       background: rgba(0,212,255,.07); color: #bfefff; font-size: .82rem;
     }
     .layout {
       display: grid;
-      grid-template-columns: 280px 1fr;
+      grid-template-columns: 250px minmax(0, 1fr);
       min-height: calc(100vh - 140px);
     }
     @media (max-width: 900px) {
       .layout { grid-template-columns: 1fr; }
-      .sidebar { position: static; max-height: none; }
+      .sidebar {
+        position: static; max-height: 340px; border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .hero-actions { display: none; }
+      .main { padding: .85rem; }
     }
     .sidebar {
       background: var(--panel);
       border-right: 1px solid var(--border);
-      padding: 1rem;
+      padding: .8rem;
       overflow-y: auto;
       max-height: calc(100vh - 140px);
       position: sticky;
@@ -120,11 +125,14 @@
       background: rgba(255,215,0,.1); color: var(--gold);
     }
     .main {
-      padding: 1.5rem;
+      padding: 1.25rem;
       overflow-y: auto;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
     }
     .section {
-      margin-bottom: 2.5rem;
+      margin-bottom: 1.5rem;
       scroll-margin-top: 1rem;
     }
     .section-header {
@@ -153,14 +161,14 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 8px;
-      margin-bottom: .8rem;
+      margin-bottom: .6rem;
       overflow: hidden;
       transition: border-color .2s;
     }
     .cmd-card:hover { border-color: var(--gold-dim); }
     .cmd-head {
       display: flex; align-items: flex-start; justify-content: space-between;
-      gap: .8rem; padding: .8rem 1rem;
+      gap: .7rem; padding: .65rem .8rem;
       background: var(--panel2);
     }
     .cmd-title {
@@ -188,7 +196,7 @@
     }
     .copy-btn:hover { filter: brightness(1.1); }
     .copy-btn.copied { background: var(--green); }
-    .cmd-body { padding: .8rem 1rem; }
+    .cmd-body { padding: .65rem .8rem; }
     .cmd-desc { font-size: .85rem; color: var(--muted); margin-bottom: .6rem; }
     .cmd-usage {
       font-size: .8rem; color: var(--cyan);
@@ -223,6 +231,11 @@
       border-top: 1px solid var(--border);
       color: var(--muted); font-size: .8rem;
     }
+    .library-hint {
+      margin-bottom: 1rem; padding: .65rem .8rem; border-radius: 7px;
+      background: var(--panel); border: 1px solid var(--border);
+      color: var(--muted); font-size: .8rem;
+    }
   </style>
 </head>
 <body>
@@ -232,16 +245,16 @@
   <p>Thư viện lệnh chuyên nghiệp · Map thường · Mod tận thế · Command Block</p>
   <div class="stats">
     <div class="stat">Tổng lệnh: <b id="total-count">...</b></div>
-    <div class="stat">Đang hiện: <b id="shown-count">...</b></div>
+    <div class="stat">Kết quả: <b id="shown-count">...</b></div>
     <div class="stat">Hồ sơ chính: <b>Java 1.20.1 Forge</b></div>
     <div class="stat">Danh mục: <b id="section-count">...</b></div>
   </div>
   <div class="hero-actions">
-    <a class="hero-action" href="#huong-dan">🚀 Bắt đầu</a>
-    <a class="hero-action" href="#give-vu-khi">⚔️ Trang bị</a>
-    <a class="hero-action" href="#summon-quai">🧟 Triệu hồi</a>
-    <a class="hero-action" href="#xay-dung">🏗️ Xây dựng</a>
-    <a class="hero-action" href="#guard-villagers">🛡️ Guard Villagers</a>
+    <button class="hero-action" data-section="huong-dan">🚀 Bắt đầu</button>
+    <button class="hero-action" data-section="give-vu-khi">⚔️ Trang bị</button>
+    <button class="hero-action" data-section="summon-quai">🧟 Triệu hồi</button>
+    <button class="hero-action" data-section="xay-dung">🏗️ Xây dựng</button>
+    <button class="hero-action" data-section="guard-villagers">🛡️ Guard Villagers</button>
   </div>
   <div class="profile-note">
     <b>Quan trọng:</b> Modpack của bạn dùng Java 1.20.1. Lệnh gắn nhãn 1.21 dùng cú pháp
@@ -251,7 +264,7 @@
 
 <div class="layout">
   <aside class="sidebar">
-    <input type="search" class="search-box" id="search" placeholder="🔍 Tìm lệnh... (zombie, guard, give, fill...)">
+    <input type="search" class="search-box" id="search" placeholder="🔍 Tìm trong 50.000 lệnh...">
     <div class="filter-row">
       <button class="filter-btn active" data-filter="all">Tất cả</button>
       <button class="filter-btn" data-filter="chat">Chat</button>
@@ -261,7 +274,10 @@
     <nav id="toc"></nav>
   </aside>
 
-  <main class="main" id="content"></main>
+  <main class="main">
+    <div class="library-hint" id="library-hint">Chọn một danh mục bên trái. Khi nhập từ khóa, trang sẽ tìm trong toàn bộ thư viện.</div>
+    <div id="content"></div>
+  </main>
 </div>
 
 <footer>
@@ -1032,8 +1048,12 @@ function genDataModify() {
 
 let ALL_COMMANDS = [];
 let filteredCommands = [];
-const PAGE_SIZE = 40;
+const PAGE_SIZE = 24;
+const SEARCH_PREVIEW_SIZE = 8;
 const renderState = {};
+let activeSection = 'huong-dan';
+let activeType = 'all';
+let currentQuery = '';
 
 function buildAllCommands() {
   const result = [];
@@ -1067,13 +1087,26 @@ function renderTOC() {
 
   toc.querySelectorAll('.toc-link').forEach(link => {
     link.addEventListener('click', () => {
-      const section = document.getElementById(link.dataset.section);
-      if (!section) return;
-      section.scrollIntoView({ behavior: 'smooth' });
-      toc.querySelectorAll('.toc-link').forEach(l => l.classList.remove('active'));
-      link.classList.add('active');
+      selectSection(link.dataset.section);
     });
   });
+  const initialLink = toc.querySelector(`[data-section="${activeSection}"]`);
+  if (initialLink) initialLink.classList.add('active');
+}
+
+function selectSection(sectionId) {
+  activeSection = sectionId;
+  activeType = 'all';
+  currentQuery = '';
+  document.getElementById('search').value = '';
+  document.querySelectorAll('.filter-btn').forEach(button => {
+    button.classList.toggle('active', button.dataset.filter === 'all');
+  });
+  document.querySelectorAll('.toc-link').forEach(link => {
+    link.classList.toggle('active', link.dataset.section === sectionId);
+  });
+  refreshView();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function typeTag(type) {
@@ -1119,8 +1152,9 @@ function renderSections(commands) {
   content.innerHTML = SECTIONS.map(sec => {
     const cmds = bySection[sec.id] || [];
     if (!cmds.length) return '';
-    renderState[sec.id] = { shown: PAGE_SIZE, total: cmds.length };
-    const initial = cmds.slice(0, PAGE_SIZE);
+    const initialLimit = currentQuery ? SEARCH_PREVIEW_SIZE : PAGE_SIZE;
+    renderState[sec.id] = { shown: initialLimit, total: cmds.length };
+    const initial = cmds.slice(0, initialLimit);
     const guide = sec.id === 'huong-dan' ? `
       <div class="guide-card">
         <h4>🚀 Quy trình Cheat Mode chuẩn</h4>
@@ -1160,7 +1194,7 @@ function renderSections(commands) {
       <div class="cmd-list" id="list-${sec.id}">
         ${initial.map(renderCmdCard).join('')}
       </div>
-      ${cmds.length > PAGE_SIZE ? `<button class="load-more" data-section="${sec.id}">Xem thêm ${Math.min(PAGE_SIZE, cmds.length - PAGE_SIZE)} / ${cmds.length - PAGE_SIZE} lệnh còn lại ↓</button>` : ''}
+      ${cmds.length > initialLimit ? `<button class="load-more" data-section="${sec.id}">Xem thêm ${Math.min(PAGE_SIZE, cmds.length - initialLimit)} / ${cmds.length - initialLimit} lệnh còn lại ↓</button>` : ''}
     </section>`;
   }).join('');
 
@@ -1224,30 +1258,53 @@ function init() {
   document.getElementById('total-count').textContent = ALL_COMMANDS.length.toLocaleString();
   document.getElementById('section-count').textContent = SECTIONS.length.toLocaleString();
   renderTOC();
-  renderSections(ALL_COMMANDS);
-  updateShownCount();
+  refreshView();
 
   let debounce;
   document.getElementById('search').addEventListener('input', e => {
     clearTimeout(debounce);
-    debounce = setTimeout(() => applyFilters(), 200);
+    debounce = setTimeout(() => {
+      currentQuery = e.target.value.trim();
+      refreshView();
+    }, 200);
   });
 
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      applyFilters();
+      activeType = btn.dataset.filter;
+      refreshView();
     });
+  });
+
+  document.querySelectorAll('.hero-action[data-section]').forEach(button => {
+    button.addEventListener('click', () => selectSection(button.dataset.section));
   });
 }
 
-function applyFilters() {
-  const query = document.getElementById('search').value;
-  const typeFilter = document.querySelector('.filter-btn.active').dataset.filter;
-  filteredCommands = filterCommands(query, typeFilter);
+function refreshView() {
+  filteredCommands = filterCommands(currentQuery, activeType);
+  if (!currentQuery && activeType !== 'mod') {
+    filteredCommands = filteredCommands.filter(command => command.sectionId === activeSection);
+  }
   renderSections(filteredCommands);
   document.getElementById('shown-count').textContent = filteredCommands.length.toLocaleString();
+  const hint = document.getElementById('library-hint');
+  if (currentQuery) {
+    hint.innerHTML = `Kết quả toàn thư viện cho <b>“${escapeHtml(currentQuery)}”</b>: ${filteredCommands.length.toLocaleString('vi-VN')} lệnh. Mỗi mục hiện trước ${SEARCH_PREVIEW_SIZE} lệnh để trang gọn hơn.`;
+  } else if (activeType === 'mod') {
+    hint.innerHTML = `<b>Lệnh mod</b> · ${filteredCommands.length.toLocaleString('vi-VN')} lệnh từ Guard Villagers và TaCZ.`;
+  } else {
+    const section = SECTIONS.find(item => item.id === activeSection);
+    hint.innerHTML = `<b>${section ? section.title : 'Danh mục'}</b> · ${filteredCommands.length.toLocaleString('vi-VN')} lệnh. Chọn mục khác bên trái hoặc nhập từ khóa để tìm toàn thư viện.`;
+  }
+}
+
+function escapeHtml(value) {
+  return value.replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+  })[char]);
 }
 
 init();
