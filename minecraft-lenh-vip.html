@@ -112,6 +112,32 @@
     .filter-btn.active, .filter-btn:hover {
       border-color: var(--gold); color: var(--gold);
     }
+    .uuid-config {
+      margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 7px;
+      background: var(--code-bg); overflow: hidden;
+    }
+    .uuid-config summary {
+      padding: .55rem .65rem; cursor: pointer; color: var(--cyan);
+      font-size: .8rem; font-weight: 700; user-select: none;
+    }
+    .uuid-config-body { padding: 0 .65rem .65rem; }
+    .uuid-config-body p { color: var(--muted); font-size: .72rem; margin-bottom: .5rem; }
+    .uuid-input {
+      width: 100%; padding: .5rem; background: var(--panel);
+      border: 1px solid var(--border); border-radius: 5px; color: var(--text);
+      font: .72rem Consolas, monospace;
+    }
+    .uuid-input:focus { outline: none; border-color: var(--cyan); }
+    .uuid-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; margin-top: .45rem; }
+    .uuid-btn {
+      padding: .4rem; border: 1px solid var(--border); border-radius: 5px;
+      background: var(--panel2); color: var(--text); cursor: pointer; font-size: .7rem;
+    }
+    .uuid-btn.primary { border-color: var(--gold-dim); color: var(--gold); }
+    .uuid-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .uuid-status { min-height: 1.2rem; margin-top: .4rem; font-size: .68rem; color: var(--muted); }
+    .uuid-status.success { color: var(--green); }
+    .uuid-status.error { color: var(--red); }
     .key-grid {
       display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem;
     }
@@ -302,6 +328,18 @@
       <button class="filter-btn" data-filter="key">Phím</button>
       <button class="filter-btn" data-filter="mod">Mod</button>
     </div>
+    <details class="uuid-config">
+      <summary>👤 UUID chủ nhân</summary>
+      <div class="uuid-config-body">
+        <p>Chạy lệnh lấy UUID, dán kết quả vào đây rồi lưu. Web tự cập nhật các lệnh Owner.</p>
+        <input class="uuid-input" id="uuid-input" spellcheck="false" aria-label="UUID người chơi" placeholder="UUID hoặc [I; 1, 2, 3, 4]">
+        <div class="uuid-actions">
+          <button class="uuid-btn" id="copy-uuid-command" type="button">📋 Lệnh lấy UUID</button>
+          <button class="uuid-btn primary" id="save-uuid" type="button">💾 Lưu & đồng bộ</button>
+        </div>
+        <div class="uuid-status" id="uuid-status"></div>
+      </div>
+    </details>
     <nav id="toc"></nav>
   </aside>
 
@@ -320,7 +358,9 @@
 //  COMMAND GENERATOR — 50,000+ lệnh Minecraft Cheat Mode
 // ============================================================
 
-const USER_UUID = '6fac357c-1d75-3c23-ace8-9f68a0da7efb';
+const DEFAULT_USER_UUID = '6fac357c-1d75-3c23-ace8-9f68a0da7efb';
+const UUID_STORAGE_KEY = 'minecraft-cheat-mode-owner-uuid';
+let USER_UUID = loadStoredUuid();
 
 const SECTIONS = [
   { group: '01 · Bắt đầu', id: 'huong-dan', title: '📖 Hướng Dẫn Cơ Bản', gen: genGuide },
@@ -376,6 +416,47 @@ function key(title, combo, desc, group = 'Minecraft', tags = []) {
     kind: 'key',
     keyGroup: group,
   };
+}
+
+function loadStoredUuid() {
+  if (typeof localStorage === 'undefined') return DEFAULT_USER_UUID;
+  try {
+    return normalizeUuid(localStorage.getItem(UUID_STORAGE_KEY) || '') || DEFAULT_USER_UUID;
+  } catch {
+    return DEFAULT_USER_UUID;
+  }
+}
+
+function normalizeUuid(value) {
+  const text = String(value || '').trim();
+  const canonical = text.match(/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i);
+  if (canonical) return canonical[0].toLowerCase();
+
+  const intArray = text.match(/\[I;\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*\]/i);
+  if (!intArray) return null;
+  try {
+    const hex = intArray.slice(1).map(number =>
+      BigInt.asUintN(32, BigInt(number)).toString(16).padStart(8, '0')
+    ).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  } catch {
+    return null;
+  }
+}
+
+async function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand('copy');
+  textarea.remove();
 }
 
 function jsonName(text, color = 'gold', extra = {}) {
@@ -518,7 +599,7 @@ function genGuide() {
     cmd('Tắt mob spawn tự nhiên', 'gamerule doMobSpawning false', { type: 'chat', desc: 'Không sinh quái tự nhiên — dùng khi test lệnh summon.' }),
     cmd('Bật mob spawn', 'gamerule doMobSpawning true', { type: 'chat', desc: 'Bật lại sinh quái tự nhiên.' }),
     cmd('Không mất đói', 'gamerule naturalRegeneration true', { type: 'chat', desc: 'Hồi máu tự nhiên.' }),
-    cmd('Xem UUID của bạn', 'data get entity @s UUID', { type: 'chat', desc: 'Lấy UUID để gán Owner cho guard/sói. Copy chuỗi UUID dạng string.', usage: 'Chạy trong chat, ghi lại UUID' }),
+    cmd('Lấy UUID để đồng bộ web', 'data get entity @s UUID', { type: 'chat', desc: 'Game thường trả về dạng [I; số, số, số, số]. Dán nguyên kết quả vào ô “UUID chủ nhân” rồi bấm Lưu & đồng bộ.', usage: 'Chạy trong chat; web tự đổi mảng số thành UUID chuẩn' }),
     cmd('Xem Advanced Tooltips (F3+H)', '— Nhấn F3 + H trong game —', { type: 'chat', desc: 'Hiện ID vật phẩm khi di chuột — cần để tìm ID súng mod TaCZ.', usage: 'Phím tắt, không phải lệnh' }),
     cmd('Xem item đang cầm', 'item modify entity @s weapon.mainhand', { type: 'chat', desc: 'Kiểm tra vật phẩm tay chính (1.20.5+ dùng /item).', version: '1.20.5+' }),
     cmd('Đặt difficulty easy', 'difficulty easy', { type: 'chat', desc: 'Độ khó dễ.' }),
@@ -1382,7 +1463,7 @@ function bindEvents() {
     const btn = event.target.closest('.copy-btn');
     if (btn) {
       const text = decodeURIComponent(btn.dataset.cmd);
-      navigator.clipboard.writeText(text).then(() => {
+      copyText(text).then(() => {
         btn.textContent = '✅ Đã copy!';
         btn.classList.add('copied');
         setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2000);
@@ -1454,6 +1535,55 @@ function init() {
 
   document.querySelectorAll('.hero-action[data-section]').forEach(button => {
     button.addEventListener('click', () => selectSection(button.dataset.section));
+  });
+
+  setupUuidConfig();
+}
+
+function setupUuidConfig() {
+  const input = document.getElementById('uuid-input');
+  const status = document.getElementById('uuid-status');
+  const saveButton = document.getElementById('save-uuid');
+  const copyButton = document.getElementById('copy-uuid-command');
+  input.value = USER_UUID;
+  status.textContent = `Đang dùng: ${USER_UUID}`;
+
+  copyButton.addEventListener('click', async () => {
+    await copyText('/data get entity @s UUID');
+    status.className = 'uuid-status success';
+    status.textContent = 'Đã copy lệnh. Dán vào chat Minecraft rồi copy kết quả về đây.';
+  });
+
+  const saveUuid = () => {
+    const normalized = normalizeUuid(input.value);
+    if (!normalized) {
+      status.className = 'uuid-status error';
+      status.textContent = 'UUID không hợp lệ. Dán UUID chuẩn hoặc kết quả dạng [I; số, số, số, số].';
+      return;
+    }
+
+    USER_UUID = normalized;
+    input.value = normalized;
+    let persisted = true;
+    try {
+      localStorage.setItem(UUID_STORAGE_KEY, normalized);
+    } catch {
+      persisted = false;
+    }
+
+    ALL_COMMANDS = buildAllCommands();
+    document.getElementById('total-count').textContent = ALL_COMMANDS.length.toLocaleString('vi-VN');
+    renderTOC();
+    refreshView();
+    status.className = persisted ? 'uuid-status success' : 'uuid-status error';
+    status.textContent = persisted
+      ? `Đã lưu và đồng bộ Owner: ${normalized}`
+      : `Đã đồng bộ tạm thời nhưng trình duyệt không cho phép lưu cấu hình.`;
+  };
+
+  saveButton.addEventListener('click', saveUuid);
+  input.addEventListener('keydown', event => {
+    if (event.key === 'Enter') saveUuid();
   });
 }
 
