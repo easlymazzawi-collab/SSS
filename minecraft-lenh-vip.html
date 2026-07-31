@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cẩm Nang Minecraft Cheat Mode — Java 1.20.1</title>
+  <style>
+    :root {
+      --bg: #0a0a12;
+      --panel: #12121f;
+      --panel2: #1a1a2e;
+      --gold: #ffd700;
+      --gold-dim: #b8860b;
+      --red: #ff4444;
+      --green: #44ff88;
+      --cyan: #00d4ff;
+      --purple: #c77dff;
+      --text: #e8e8f0;
+      --muted: #8888aa;
+      --border: #2a2a44;
+      --code-bg: #0d0d18;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    .hero {
+      background: linear-gradient(135deg, #1a0a2e 0%, #0a1628 50%, #0a2818 100%);
+      border-bottom: 2px solid var(--gold);
+      padding: 1.15rem 1.5rem;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: clamp(1.25rem, 3vw, 1.8rem);
+      background: linear-gradient(90deg, var(--gold), #fff, var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 30px rgba(255,215,0,.3);
+    }
+    .hero p { color: var(--muted); margin-top: .25rem; font-size: .88rem; }
+    .stats {
+      display: flex; gap: .55rem; justify-content: center; flex-wrap: wrap; margin-top: .7rem;
+    }
+    .stat {
+      background: var(--panel2); border: 1px solid var(--border); border-radius: 8px;
+      padding: .35rem .75rem; font-size: .78rem;
+    }
+    .stat b { color: var(--gold); }
+    .hero-actions {
+      display: flex; gap: .4rem; justify-content: center; flex-wrap: wrap; margin-top: .65rem;
+    }
+    .hero-action {
+      padding: .4rem .7rem; border-radius: 6px; border: 1px solid var(--border);
+      background: rgba(18,18,31,.8); color: var(--text); text-decoration: none;
+      font-size: .82rem; cursor: pointer;
+    }
+    .hero-action:hover { border-color: var(--gold); color: var(--gold); }
+    .profile-note {
+      max-width: 900px; margin: .65rem auto 0; padding: .5rem .75rem;
+      border: 1px solid rgba(0,212,255,.35); border-radius: 8px;
+      background: rgba(0,212,255,.07); color: #bfefff; font-size: .82rem;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      min-height: calc(100vh - 140px);
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar {
+        position: static; max-height: 340px; border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .hero-actions { display: none; }
+      .main { padding: .85rem; }
+      .key-grid { grid-template-columns: 1fr; }
+      .key-card { grid-template-columns: 100px 1fr; }
+    }
+    .sidebar {
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      padding: .8rem;
+      overflow-y: auto;
+      max-height: calc(100vh - 140px);
+      position: sticky;
+      top: 0;
+    }
+    .search-box {
+      width: 100%;
+      padding: .6rem .8rem;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: .9rem;
+      margin-bottom: 1rem;
+    }
+    .search-box:focus { outline: none; border-color: var(--gold); }
+    .filter-row {
+      display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1rem;
+    }
+    .filter-btn {
+      padding: .3rem .6rem; font-size: .75rem; border-radius: 4px;
+      border: 1px solid var(--border); background: var(--panel2);
+      color: var(--muted); cursor: pointer;
+    }
+    .filter-btn.active, .filter-btn:hover {
+      border-color: var(--gold); color: var(--gold);
+    }
+    .uuid-config {
+      margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 7px;
+      background: var(--code-bg); overflow: hidden;
+    }
+    .uuid-config summary {
+      padding: .55rem .65rem; cursor: pointer; color: var(--cyan);
+      font-size: .8rem; font-weight: 700; user-select: none;
+    }
+    .uuid-config-body { padding: 0 .65rem .65rem; }
+    .uuid-config-body p { color: var(--muted); font-size: .72rem; margin-bottom: .5rem; }
+    .uuid-input {
+      width: 100%; padding: .5rem; background: var(--panel);
+      border: 1px solid var(--border); border-radius: 5px; color: var(--text);
+      font: .72rem Consolas, monospace;
+    }
+    .uuid-input:focus { outline: none; border-color: var(--cyan); }
+    .uuid-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; margin-top: .45rem; }
+    .uuid-btn {
+      padding: .4rem; border: 1px solid var(--border); border-radius: 5px;
+      background: var(--panel2); color: var(--text); cursor: pointer; font-size: .7rem;
+    }
+    .uuid-btn.primary { border-color: var(--gold-dim); color: var(--gold); }
+    .uuid-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .uuid-status { min-height: 1.2rem; margin-top: .4rem; font-size: .68rem; color: var(--muted); }
+    .uuid-status.success { color: var(--green); }
+    .uuid-status.error { color: var(--red); }
+    .key-grid {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem;
+    }
+    .key-card {
+      display: grid; grid-template-columns: minmax(110px, auto) 1fr; gap: .8rem;
+      align-items: center; padding: .75rem; background: var(--panel);
+      border: 1px solid var(--border); border-radius: 8px;
+    }
+    .key-card:hover { border-color: var(--gold-dim); }
+    .key-combo { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
+    kbd {
+      display: inline-block; min-width: 30px; padding: .25rem .45rem;
+      border: 1px solid #4a4a67; border-bottom-width: 3px; border-radius: 5px;
+      background: #202033; color: #fff; text-align: center;
+      font: 700 .75rem 'Segoe UI', sans-serif; white-space: nowrap;
+    }
+    .key-plus { color: var(--muted); font-size: .7rem; }
+    .key-info strong { display: block; font-size: .86rem; margin-bottom: .15rem; }
+    .key-info span { display: block; color: var(--muted); font-size: .76rem; }
+    .key-group {
+      display: inline-block; color: var(--cyan); font-size: .65rem;
+      text-transform: uppercase; letter-spacing: .06em; margin-top: .25rem;
+    }
+    @media (max-width: 900px) {
+      .key-grid { grid-template-columns: 1fr; }
+      .key-card { grid-template-columns: 100px 1fr; }
+    }
+    .toc-group { margin-bottom: .8rem; }
+    .toc-group h3 {
+      font-size: .7rem; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--gold-dim); margin-bottom: .4rem;
+    }
+    .toc-group + .toc-group { border-top: 1px solid var(--border); padding-top: .8rem; }
+    .toc-link {
+      display: block; padding: .35rem .5rem; font-size: .82rem;
+      color: var(--muted); text-decoration: none; border-radius: 4px;
+      cursor: pointer;
+    }
+    .toc-link:hover, .toc-link.active {
+      background: rgba(255,215,0,.1); color: var(--gold);
+    }
+    .main {
+      padding: 1.25rem;
+      overflow-y: auto;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section {
+      margin-bottom: 1.5rem;
+      scroll-margin-top: 1rem;
+    }
+    .section-header {
+      display: flex; align-items: center; gap: .8rem;
+      margin-bottom: 1rem; padding-bottom: .5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-header h2 { font-size: 1.3rem; color: var(--gold); }
+    .section-header .badge {
+      font-size: .7rem; background: var(--panel2);
+      border: 1px solid var(--border); padding: .2rem .5rem;
+      border-radius: 99px; color: var(--muted);
+    }
+    .guide-card {
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--cyan);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .guide-card h4 { color: var(--cyan); margin-bottom: .5rem; }
+    .guide-card p, .guide-card li { font-size: .88rem; color: var(--muted); }
+    .guide-card ul { padding-left: 1.2rem; }
+    .cmd-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: .6rem;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .cmd-card:hover { border-color: var(--gold-dim); }
+    .cmd-head {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: .7rem; padding: .65rem .8rem;
+      background: var(--panel2);
+    }
+    .cmd-title {
+      font-weight: 600; font-size: .95rem;
+    }
+    .cmd-meta {
+      display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .3rem;
+    }
+    .tag {
+      font-size: .65rem; padding: .15rem .4rem; border-radius: 3px;
+      text-transform: uppercase; letter-spacing: .04em;
+    }
+    .tag-chat { background: rgba(68,255,136,.15); color: var(--green); }
+    .tag-block { background: rgba(0,212,255,.15); color: var(--cyan); }
+    .tag-both { background: rgba(199,125,255,.15); color: var(--purple); }
+    .tag-mod { background: rgba(255,68,68,.15); color: var(--red); }
+    .tag-ver { background: rgba(255,215,0,.1); color: var(--gold-dim); }
+    .tag-reviewed { background: rgba(68,255,136,.12); color: var(--green); }
+    .copy-btn {
+      flex-shrink: 0;
+      padding: .4rem .8rem;
+      background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+      border: none; border-radius: 5px;
+      color: #000; font-weight: 700; font-size: .75rem;
+      cursor: pointer; white-space: nowrap;
+    }
+    .copy-group { display: flex; gap: .35rem; flex-wrap: wrap; justify-content: flex-end; }
+    .copy-btn:hover { filter: brightness(1.1); }
+    .copy-btn.copied { background: var(--green); }
+    .cmd-body { padding: .65rem .8rem; }
+    .cmd-desc { font-size: .85rem; color: var(--muted); margin-bottom: .6rem; }
+    .cmd-usage {
+      font-size: .8rem; color: var(--cyan);
+      margin-bottom: .5rem;
+    }
+    .cmd-code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: .8rem;
+      font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+      font-size: .78rem;
+      color: #a8d8a8;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      line-height: 1.6;
+    }
+    .load-more {
+      display: block; width: 100%; padding: .8rem;
+      background: var(--panel2); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--gold); cursor: pointer;
+      font-size: .9rem; margin-top: .5rem;
+    }
+    .load-more:hover { background: rgba(255,215,0,.08); }
+    .hidden { display: none !important; }
+    .no-result {
+      text-align: center; padding: 3rem; color: var(--muted);
+    }
+    footer {
+      text-align: center; padding: 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted); font-size: .8rem;
+    }
+    .library-hint {
+      margin-bottom: 1rem; padding: .65rem .8rem; border-radius: 7px;
+      background: var(--panel); border: 1px solid var(--border);
+      color: var(--muted); font-size: .8rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>⚔️ CẨM NANG MINECRAFT CHEAT MODE ⚔️</h1>
+  <p>Thư viện lệnh chuyên nghiệp · Map thường · Mod tận thế · Command Block</p>
+  <div class="stats">
+    <div class="stat">Tổng lệnh: <b id="total-count">...</b></div>
+    <div class="stat">Kết quả: <b id="shown-count">...</b></div>
+    <div class="stat">Hồ sơ chính: <b>Java 1.20.1 Forge</b></div>
+    <div class="stat">Danh mục: <b id="section-count">...</b></div>
+    <div class="stat">Mẫu lỗi bị chặn: <b id="rejected-count">0</b></div>
+  </div>
+  <div class="hero-actions">
+    <button class="hero-action" data-section="huong-dan">🚀 Bắt đầu</button>
+    <button class="hero-action" data-section="phim-chuc-nang">⌨️ Phím</button>
+    <button class="hero-action" data-section="give-vu-khi">⚔️ Trang bị</button>
+    <button class="hero-action" data-section="summon-quai">🧟 Triệu hồi</button>
+    <button class="hero-action" data-section="xay-dung">🏗️ Xây dựng</button>
+    <button class="hero-action" data-section="guard-villagers">🛡️ Guard Villagers</button>
+  </div>
+  <div class="profile-note">
+    <b>Hồ sơ đã rà soát:</b> Java 1.20.1 Forge. Nút Chat copy lệnh có dấu <code>/</code>;
+    nút Block tự bỏ dấu <code>/</code>. Lệnh mod vẫn phụ thuộc đúng phiên bản mod/config trong modpack.
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <input type="search" class="search-box" id="search" placeholder="🔍 Tìm trong thư viện đã rà soát...">
+    <div class="filter-row">
+      <button class="filter-btn active" data-filter="all">Tất cả</button>
+      <button class="filter-btn" data-filter="chat">Chat</button>
+      <button class="filter-btn" data-filter="block">Khối lệnh</button>
+      <button class="filter-btn" data-filter="key">Phím</button>
+      <button class="filter-btn" data-filter="mod">Mod</button>
+    </div>
+    <details class="uuid-config">
+      <summary>👤 UUID chủ nhân</summary>
+      <div class="uuid-config-body">
+        <p>Chạy lệnh lấy UUID, dán kết quả vào đây rồi lưu. Web tự cập nhật các lệnh Owner.</p>
+        <input class="uuid-input" id="uuid-input" spellcheck="false" aria-label="UUID người chơi" placeholder="UUID hoặc [I; 1, 2, 3, 4]">
+        <div class="uuid-actions">
+          <button class="uuid-btn" id="copy-uuid-command" type="button">📋 Lệnh lấy UUID</button>
+          <button class="uuid-btn primary" id="save-uuid" type="button">💾 Lưu & đồng bộ</button>
+        </div>
+        <div class="uuid-status" id="uuid-status"></div>
+      </div>
+    </details>
+    <nav id="toc"></nav>
+  </aside>
+
+  <main class="main">
+    <div class="library-hint" id="library-hint">Chọn một danh mục bên trái. Khi nhập từ khóa, trang sẽ tìm trong toàn bộ thư viện.</div>
+    <div id="content"></div>
+  </main>
+</div>
+
+<footer>
+  Cẩm Nang Minecraft Cheat Mode · Java 1.20.1 Forge là hồ sơ chính · Hãy sao lưu world trước khi chạy lệnh diện rộng
+</footer>
+
+<script>
+// ============================================================
+//  COMMAND GENERATOR — Minecraft Java 1.20.1 reviewed templates
+// ============================================================
+
+const DEFAULT_USER_UUID = '6fac357c-1d75-3c23-ace8-9f68a0da7efb';
+const UUID_STORAGE_KEY = 'minecraft-cheat-mode-owner-uuid';
+let USER_UUID = loadStoredUuid();
+
+const SECTIONS = [
+  { group: '01 · Bắt đầu', id: 'huong-dan', title: '📖 Hướng Dẫn Cơ Bản', gen: genGuide },
+  { group: '01 · Bắt đầu', id: 'phim-chuc-nang', title: '⌨️ Phím & Chức Năng', gen: genKeys },
+  { group: '01 · Bắt đầu', id: 'command-block', title: '🟣 Khối Lệnh & Công Cụ', gen: genCommandBlock },
+  { group: '01 · Bắt đầu', id: 'gamemode', title: '🎮 Gamemode & Luật Chơi', gen: genGamemode },
+  { group: '02 · Người chơi', id: 'give-do', title: '🎁 Đồ Hữu Ích', gen: genItems },
+  { group: '02 · Người chơi', id: 'give-vu-khi', title: '⚔️ Vũ Khí VIP', gen: genWeapons },
+  { group: '02 · Người chơi', id: 'give-giap', title: '🛡️ Giáp VIP', gen: genArmor },
+  { group: '02 · Người chơi', id: 'enchant-all', title: '✨ Ma Trận Phù Phép', gen: genEnchantAll },
+  { group: '02 · Người chơi', id: 'effect', title: '✨ Hiệu Ứng & Buff', gen: genEffects },
+  { group: '02 · Người chơi', id: 'attribute', title: '💪 Thuộc Tính', gen: genAttributes },
+  { group: '02 · Người chơi', id: 'teleport', title: '🌀 Dịch Chuyển', gen: genTeleport },
+  { group: '03 · Thế giới', id: 'thoi-tiet', title: '🌦️ Thời Tiết & Thời Gian', gen: genWeather },
+  { group: '03 · Thế giới', id: 'blocks-give', title: '🧱 Block & Vật Liệu', gen: genBlocks },
+  { group: '03 · Thế giới', id: 'xay-dung', title: '🏗️ Công Trình Nhanh', gen: genBuild },
+  { group: '03 · Thế giới', id: 'fill-mega', title: '🏰 Ma Trận Fill', gen: genFillMega },
+  { group: '04 · Sinh vật', id: 'summon-quai', title: '🧟 Quái VIP', gen: genMobs },
+  { group: '04 · Sinh vật', id: 'mega-summon', title: '🌟 Ma Trận Triệu Hồi', gen: genMegaSummon },
+  { group: '04 · Sinh vật', id: 'summon-boss', title: '👹 Boss & Quái Khổng Lồ', gen: genBosses },
+  { group: '04 · Sinh vật', id: 'summon-thu', title: '🐺 Thú Cưng', gen: genPets },
+  { group: '04 · Sinh vật', id: 'summon-dan-lang', title: '🏘️ Dân Làng & NPC', gen: genVillagers },
+  { group: '04 · Sinh vật', id: 'golem', title: '🤖 Golem & Hộ Vệ', gen: genGolems },
+  { group: '05 · Mod tận thế', id: 'guard-villagers', title: '🛡️ Guard Villagers', gen: genGuards },
+  { group: '05 · Mod tận thế', id: 'tacz-sung', title: '🔫 TaCZ Súng & Đạn', gen: genTacz },
+  { group: '06 · Quản trị', id: 'combat', title: '💀 Kill & Dọn Map', gen: genCombat },
+  { group: '06 · Quản trị', id: 'scoreboard', title: '📊 Scoreboard & Vòng Lặp', gen: genScoreboard },
+  { group: '06 · Quản trị', id: 'data-modify', title: '🔧 Data Modify', gen: genDataModify },
+  { group: '07 · Giải trí', id: 'fun', title: '🎉 Lệnh Vui & Troll', gen: genFun },
+];
+
+function cmd(title, command, opts = {}) {
+  const version = opts.version || '1.20.1';
+  return {
+    title,
+    command: command.startsWith('/') ? command : '/' + command,
+    desc: opts.desc || '',
+    usage: opts.usage || 'Dán vào chat (F3+C copy) hoặc khối lệnh tím Repeat',
+    type: opts.type || 'both',
+    version,
+    tags: opts.tags || [],
+    review: opts.review || (version.includes('Mod') ? 'mod-dependent' : 'reviewed'),
+  };
+}
+
+function key(title, combo, desc, group = 'Minecraft', tags = []) {
+  return {
+    title,
+    command: combo,
+    desc,
+    usage: 'Có thể đổi tại Options → Controls → Key Binds',
+    type: 'key',
+    version: 'Java 1.20.1',
+    tags: [group, ...tags],
+    kind: 'key',
+    keyGroup: group,
+  };
+}
+
+function loadStoredUuid() {
+  if (typeof localStorage === 'undefined') return DEFAULT_USER_UUID;
+  try {
+    return normalizeUuid(localStorage.getItem(UUID_STORAGE_KEY) || '') || DEFAULT_USER_UUID;
+  } catch {
+    return DEFAULT_USER_UUID;
+  }
+}
+
+function normalizeUuid(value) {
+  const text = String(value || '').trim();
+  const canonical = text.match(/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i);
+  if (canonical) return canonical[0].toLowerCase();
+
+  const intArray = text.match(/\[I;\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*\]/i);
+  if (!intArray) return null;
+  try {
+    const hex = intArray.slice(1).map(number =>
+      BigInt.asUintN(32, BigInt(number)).toString(16).padStart(8, '0')
+    ).join('');
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  } catch {
+    return null;
+  }
+}
+
+async function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand('copy');
+  textarea.remove();
+}
+
+function jsonName(text, color = 'gold', extra = {}) {
+  return JSON.stringify({ text, color, bold: true, ...extra });
+}
+
+function vipAttrs(hp = 1024, dmg = null) {
+  const safeHp = Math.min(1024, Math.max(1, hp));
+  const a = [`{Name:"minecraft:generic.max_health",Base:${safeHp}.0d}`];
+  if (dmg !== null) {
+    a.push(`{Name:"minecraft:generic.attack_damage",Base:${dmg}.0d}`);
+  }
+  return a.join(',');
+}
+
+function vipEffects() {
+  return `ActiveEffects:[{Id:1b,Amplifier:9b,Duration:200000,ShowParticles:0b},{Id:5b,Amplifier:9b,Duration:200000,ShowParticles:0b},{Id:11b,Amplifier:4b,Duration:200000,ShowParticles:0b}]`;
+}
+
+function uuidToIntArray(uuid = USER_UUID) {
+  const normalized = normalizeUuid(uuid);
+  if (!normalized) return '[I;0,0,0,0]';
+  const hex = normalized.replaceAll('-', '');
+  const values = [0, 8, 16, 24].map(offset => {
+    const unsigned = Number.parseInt(hex.slice(offset, offset + 8), 16);
+    return unsigned > 0x7fffffff ? unsigned - 0x100000000 : unsigned;
+  });
+  return `[I;${values.join(',')}]`;
+}
+
+function netherArmor120() {
+  const pieces = ['boots','leggings','chestplate','helmet'];
+  return pieces.map(p =>
+    `{id:"minecraft:netherite_${p}",Count:1b,tag:{Enchantments:[{id:"protection",lvl:4s},{id:"unbreaking",lvl:3s}]}}`
+  ).join(',');
+}
+
+// ---- GENERATORS ----
+
+function genKeys() {
+  const keys = [];
+
+  [
+    ['Đi tới', 'W', 'Di chuyển nhân vật về phía trước.'],
+    ['Đi lùi', 'S', 'Di chuyển nhân vật về phía sau.'],
+    ['Đi sang trái', 'A', 'Di chuyển ngang sang trái.'],
+    ['Đi sang phải', 'D', 'Di chuyển ngang sang phải.'],
+    ['Nhảy', 'Space', 'Nhảy; khi bơi sẽ nổi lên.'],
+    ['Chạy nhanh', 'Ctrl', 'Giữ trong khi di chuyển để sprint.'],
+    ['Chạy nhanh bằng W', 'W + W', 'Nhấn W hai lần nhanh để sprint.'],
+    ['Cúi / đi chậm', 'Shift', 'Sneak, hạn chế rơi khỏi mép block.'],
+    ['Tấn công / đào', 'Chuột trái', 'Đánh entity hoặc giữ để phá block.'],
+    ['Dùng / đặt block', 'Chuột phải', 'Dùng vật phẩm, mở block hoặc đặt block.'],
+    ['Chọn block', 'Chuột giữa', 'Chọn block đang nhìn nếu có trong túi; Creative sẽ lấy block.'],
+    ['Đổi ô hotbar', 'Con lăn chuột', 'Cuộn qua các ô 1–9.'],
+    ['Chọn ô nhanh', '1–9', 'Chọn trực tiếp một ô trên hotbar.'],
+    ['Mở túi đồ', 'E', 'Mở inventory và màn hình chế tạo cá nhân.'],
+    ['Vứt một vật phẩm', 'Q', 'Vứt một món từ stack đang cầm.'],
+    ['Vứt cả stack', 'Ctrl + Q', 'Vứt toàn bộ stack đang cầm.'],
+    ['Đổi hai tay', 'F', 'Đổi vật phẩm tay chính và tay phụ.'],
+    ['Danh sách người chơi', 'Tab', 'Hiện danh sách người chơi trên server.'],
+    ['Mở chat', 'T', 'Mở ô chat thông thường.'],
+    ['Mở dòng lệnh', '/', 'Mở chat với dấu / sẵn.'],
+    ['Tạm dừng / menu', 'Esc', 'Mở menu; singleplayer sẽ tạm dừng nếu cho phép.'],
+    ['Tiến trình', 'L', 'Mở màn hình Advancements.'],
+  ].forEach(([title, combo, desc]) => keys.push(key(title, combo, desc, 'Điều khiển cơ bản')));
+
+  [
+    ['Di chuyển nhanh stack', 'Shift + Chuột trái', 'Chuyển cả stack giữa inventory và rương/máy.'],
+    ['Chia đôi stack', 'Chuột phải', 'Nhấc một nửa stack hoặc đặt từng món.'],
+    ['Gom vật phẩm cùng loại', 'Chuột trái + Chuột trái', 'Nhấp đúp một item để gom các item cùng loại.'],
+    ['Đưa item vào hotbar', '1–9', 'Khi trỏ vào item, nhấn số để đổi với ô hotbar tương ứng.'],
+    ['Chia đều nhiều ô', 'Kéo chuột trái', 'Giữ chuột trái và kéo qua nhiều slot để chia đều.'],
+    ['Đặt mỗi ô một món', 'Kéo chuột phải', 'Giữ chuột phải và kéo để đặt một item mỗi slot.'],
+    ['Lấy cả stack Creative', 'Chuột giữa', 'Trong Creative inventory, lấy stack tối đa của item.'],
+    ['Xóa item Creative', 'Thả vào ô X', 'Kéo item vào ô dấu X trong Creative inventory.'],
+    ['Tìm item', 'E + tab Tìm kiếm', 'Mở Creative inventory và chọn tab kính lúp.'],
+  ].forEach(([title, combo, desc]) => keys.push(key(title, combo, desc, 'Kho đồ')));
+
+  [
+    ['Bay Creative', 'Space + Space', 'Nhấn Space hai lần để bật hoặc tắt bay.'],
+    ['Bay lên', 'Space', 'Giữ Space khi đang bay.'],
+    ['Bay xuống', 'Shift', 'Giữ Shift khi đang bay.'],
+    ['Bay nhanh', 'Ctrl + W', 'Sprint trong khi bay để tăng tốc.'],
+    ['Sao chép block có NBT', 'Ctrl + Chuột giữa', 'Creative: lấy block kèm dữ liệu như command block, rương hoặc bảng.'],
+    ['Lưu hotbar số 1–9', 'C + 1–9', 'Creative: lưu toàn bộ hotbar vào một preset.'],
+    ['Nạp hotbar số 1–9', 'X + 1–9', 'Creative: khôi phục preset hotbar đã lưu.'],
+    ['Thanh công cụ Creative', 'E', 'Mở kho item Creative và ô tìm kiếm.'],
+  ].forEach(([title, combo, desc]) => keys.push(key(title, combo, desc, 'Creative Mode')));
+
+  [
+    ['Ẩn giao diện', 'F1', 'Ẩn HUD và tay để chụp ảnh sạch.'],
+    ['Chụp màn hình', 'F2', 'Lưu ảnh vào thư mục screenshots.'],
+    ['Màn hình debug', 'F3', 'Hiện tọa độ, FPS, biome, hướng nhìn và thông tin hệ thống.'],
+    ['Đổi góc nhìn', 'F5', 'Đổi giữa góc nhìn thứ nhất, thứ ba sau và thứ ba trước.'],
+    ['Toàn màn hình', 'F11', 'Bật hoặc tắt fullscreen.'],
+    ['Tải lại chunk', 'F3 + A', 'Reload toàn bộ chunk đang hiển thị.'],
+    ['Hiện hitbox', 'F3 + B', 'Bật/tắt hộp va chạm và hướng nhìn entity.'],
+    ['Copy tọa độ thành lệnh TP', 'F3 + C', 'Copy vị trí và góc nhìn thành lệnh /tp. Không giữ 10 giây vì sẽ kích hoạt debug crash.'],
+    ['Xóa lịch sử chat', 'F3 + D', 'Xóa các dòng chat đang hiển thị.'],
+    ['Tăng render distance', 'F3 + F', 'Tăng khoảng cách render theo từng mức.'],
+    ['Giảm render distance', 'F3 + Shift + F', 'Giảm khoảng cách render theo từng mức.'],
+    ['Hiện đường biên chunk', 'F3 + G', 'Bật/tắt lưới chunk — hữu ích khi xây farm.'],
+    ['Advanced Tooltips', 'F3 + H', 'Hiện ID item, độ bền và NBT cơ bản; dùng để tìm ID đồ mod.'],
+    ['Copy dữ liệu block/entity', 'F3 + I', 'Copy dữ liệu server-side của block hoặc entity đang nhìn.'],
+    ['Bắt đầu profiling', 'F3 + L', 'Ghi lại performance profiling trong khoảng 10 giây.'],
+    ['Đổi Creative/Spectator', 'F3 + N', 'Chuyển giữa Spectator và gamemode trước đó nếu có quyền.'],
+    ['Pause khi mất focus', 'F3 + P', 'Bật/tắt tự tạm dừng khi chuyển sang cửa sổ khác.'],
+    ['Danh sách phím F3', 'F3 + Q', 'Hiện trợ giúp toàn bộ debug shortcut trong chat.'],
+    ['Reload resource pack', 'F3 + T', 'Tải lại texture, model, âm thanh và resource packs.'],
+    ['Game Mode Switcher', 'F3 + F4', 'Giữ F3 rồi nhấn F4 để chọn gamemode nếu có quyền.'],
+    ['Biểu đồ profiler', 'Shift + F3', 'Mở màn hình debug kèm biểu đồ profiler.'],
+    ['Tạm dừng không mở menu', 'F3 + Esc', 'Tạm dừng singleplayer mà không mở menu tùy chọn.'],
+  ].forEach(([title, combo, desc]) => keys.push(key(title, combo, desc, 'Debug F3')));
+
+  [
+    ['Gợi ý lệnh / ID', 'Tab', 'Tự hoàn thành lệnh, selector, tên người chơi và ID item.'],
+    ['Lệnh trước / sau', '↑ / ↓', 'Duyệt lịch sử lệnh đã nhập trong chat.'],
+    ['Copy văn bản', 'Ctrl + C', 'Copy phần chữ đang chọn. F3+C là tổ hợp khác.'],
+    ['Dán lệnh', 'Ctrl + V', 'Dán lệnh vào chat hoặc command block.'],
+    ['Chọn toàn bộ', 'Ctrl + A', 'Chọn toàn bộ nội dung ô lệnh.'],
+    ['Xóa nhanh một từ', 'Ctrl + Backspace', 'Xóa cả từ phía trước con trỏ.'],
+    ['Chạy lệnh chat', 'Enter', 'Gửi tin nhắn hoặc thực thi lệnh.'],
+  ].forEach(([title, combo, desc]) => keys.push(key(title, combo, desc, 'Chat & Command')));
+
+  [
+    ['Bắn súng TaCZ', 'Chuột trái', 'Bắn vũ khí đang cầm.'],
+    ['Ngắm TaCZ', 'Chuột phải', 'Ngắm qua tâm ruồi hoặc ống ngắm.'],
+    ['Nạp đạn TaCZ', 'R', 'Reload súng từ đạn phù hợp trong inventory.'],
+    ['Kiểm tra toàn bộ phím TaCZ', 'Esc → Options → Controls', 'Tìm “TaCZ” trong Key Binds; phím đổi chế độ bắn/phụ kiện có thể khác theo modpack.'],
+    ['Mở GUI Guard', 'Chuột phải', 'Tương tác với guard để xem trang bị hoặc điều khiển khi mod cho phép.'],
+    ['Tạo Guard từ dân làng', 'Shift + Chuột phải', 'Cầm kiếm hoặc nỏ rồi crouch-right-click dân làng thất nghiệp/nitwit, tùy cấu hình mod.'],
+    ['Cho Guard đi theo', 'Nút Follow trong GUI', 'Mở GUI guard và bật Follow; lệnh Owner/Following trong cẩm nang làm tương tự hàng loạt.'],
+    ['Kiểm tra phím mod bị trùng', 'Esc → Options → Controls', 'Các phím màu đỏ đang xung đột; đổi một trong hai bind.'],
+  ].forEach(([title, combo, desc]) => keys.push(key(title, combo, desc, 'Mod TaCZ & Guard', ['mod'])));
+
+  return keys;
+}
+
+function genGuide() {
+  return [
+    cmd('Tắt thông báo khối lệnh', 'gamerule commandBlockOutput false', { type: 'chat', desc: 'Ẩn output của command block trong chat; lệnh này không bật quyền cheat.', usage: 'Chạy 1 lần sau khi đã bật Allow Cheats hoặc có quyền OP' }),
+    cmd('Chuyển bản thân sang Creative', 'gamemode creative @s', { type: 'chat', desc: 'Đổi gamemode của chính người chạy lệnh.', tags: ['cheat'] }),
+    cmd('Bật keepInventory', 'gamerule keepInventory true', { type: 'chat', desc: 'Chết không rơi đồ.', tags: ['cheat'] }),
+    cmd('Tắt mob spawn tự nhiên', 'gamerule doMobSpawning false', { type: 'chat', desc: 'Không sinh quái tự nhiên — dùng khi test lệnh summon.' }),
+    cmd('Bật mob spawn', 'gamerule doMobSpawning true', { type: 'chat', desc: 'Bật lại sinh quái tự nhiên.' }),
+    cmd('Chống đói thời gian dài', 'effect give @s minecraft:saturation 999999 0 true', { type: 'chat', desc: 'Cấp Saturation I; khác với gamerule naturalRegeneration.' }),
+    cmd('Lấy UUID để đồng bộ web', 'data get entity @s UUID', { type: 'chat', desc: 'Game thường trả về dạng [I; số, số, số, số]. Dán nguyên kết quả vào ô “UUID chủ nhân” rồi bấm Lưu & đồng bộ.', usage: 'Chạy trong chat; web tự đổi mảng số thành UUID chuẩn' }),
+    cmd('Xem toàn bộ item đang cầm', 'data get entity @s SelectedItem', { type: 'chat', desc: 'Hiện ID và NBT item tay chính; dùng để kiểm tra GunId của TaCZ.', usage: 'Cầm đúng vật phẩm trên tay rồi chạy trong chat' }),
+    cmd('Xem riêng NBT item đang cầm', 'data get entity @s SelectedItem.tag', { type: 'chat', desc: 'Hiện phần tag như GunId, AmmoId và enchant.' }),
+    cmd('Đặt difficulty easy', 'difficulty easy', { type: 'chat', desc: 'Độ khó dễ.' }),
+    cmd('Đặt difficulty hard', 'difficulty hard', { type: 'chat', desc: 'Độ khó khó — zombie mạnh hơn.' }),
+    cmd('Đặt difficulty peaceful', 'difficulty peaceful', { type: 'chat', desc: 'Không có quái hostile.' }),
+  ];
+}
+
+function genCommandBlock() {
+  return [
+    cmd('Lấy khối lệnh', 'give @s command_block 64', { type: 'chat', desc: 'Cấp 64 khối lệnh màu cam (Impulse).', usage: 'Chat — cần cheat/op' }),
+    cmd('Lấy khối lệnh Repeat', 'give @s repeating_command_block 64', { type: 'chat', desc: 'Khối lệnh tím — lặp liên tục khi có redstone.', usage: 'Dùng cho spawn quân đội' }),
+    cmd('Lấy khối lệnh Chain', 'give @s chain_command_block 64', { type: 'chat', desc: 'Khối lệnh xanh — chạy nối tiếp.' }),
+    cmd('Lấy cần gạt', 'give @s lever 16', { type: 'chat', desc: 'Cần gạt bật/tắt khối lệnh Repeat.' }),
+    cmd('Lấy đá đỏ', 'give @s redstone 64', { type: 'chat', desc: 'Đá đỏ kích hoạt khối lệnh.' }),
+    cmd('Lấy nút nhấn', 'give @s stone_button 16', { type: 'chat', desc: 'Nút nhấn thay cần gạt.' }),
+    cmd('Summon ngay trên khối lệnh', 'summon minecraft:zombie ~ ~1 ~ {CustomName:\'{"text":"TEST"}\'}', { type: 'block', desc: 'Tọa độ tương đối trong command block đã tính từ chính khối; không dùng execute at @s.', usage: 'Dán vào khối lệnh và bỏ dấu /' }),
+    cmd('Summon cách khối lệnh 50 ô Đông', 'summon minecraft:zombie ~50 ~ ~ {CustomName:\'{"text":"XA 50 O"}\'}', { type: 'block', desc: 'Spawn cách command block 50 block theo trục X dương.', usage: 'Khối Repeat: gạt 1–2 giây rồi tắt' }),
+    cmd('Summon tại người chơi (@p)', 'execute at @p run summon zombie ~ ~1 ~ {CustomName:\'{"text":"TAI NGUOI CHOI"}\'}', { type: 'block', desc: 'Spawn tại vị trí người chơi gần nhất.', usage: 'Khối lệnh hoặc chat' }),
+  ];
+}
+
+function genGamemode() {
+  const modes = ['survival','creative','adventure','spectator'];
+  const names = ['Sinh Tồn','Sáng Tạo','Phiêu Lưu','Khán Giả'];
+  return modes.map((m, i) => cmd(`Gamemode ${names[i]}`, `gamemode ${m}`, { type: 'chat', desc: `Chuyển sang chế độ ${names[i]}.`, tags: [m] }));
+}
+
+function genWeapons() {
+  const cmds = [];
+  const weaponProfiles = [
+    ['netherite_sword', 'KIẾM NETHERITE VIP', [['sharpness',5],['smite',5],['bane_of_arthropods',5],['knockback',2],['fire_aspect',2],['looting',3],['sweeping',3],['unbreaking',3],['mending',1]]],
+    ['netherite_axe', 'RÌU NETHERITE VIP', [['sharpness',5],['smite',5],['efficiency',5],['fortune',3],['silk_touch',1],['unbreaking',3],['mending',1]]],
+    ['netherite_pickaxe', 'CUỐC NETHERITE VIP', [['efficiency',5],['fortune',3],['silk_touch',1],['unbreaking',3],['mending',1]]],
+    ['bow', 'CUNG THẦN', [['power',5],['punch',2],['flame',1],['infinity',1],['unbreaking',3],['mending',1]]],
+    ['crossbow', 'NỎ THẦN', [['multishot',1],['quick_charge',3],['piercing',4],['unbreaking',3],['mending',1]]],
+    ['trident', 'ĐINH BA THẦN', [['loyalty',3],['impaling',5],['riptide',3],['channeling',1],['unbreaking',3],['mending',1]]],
+  ];
+
+  cmds.push(cmd('KIẾM THẦN SÁT THƯƠNG CỰC CAO', `give @s minecraft:netherite_sword{Unbreakable:1b,display:{Name:'${jsonName('KIẾM THẦN DIỆT THẾ','red')}'},AttributeModifiers:[{AttributeName:"minecraft:generic.attack_damage",Name:"cheat_damage",Amount:1000000.0d,Operation:0,UUID:[I;1,2,3,4],Slot:"mainhand"}]} 1`, { type: 'chat', desc: 'Sát thương cực cao với mục tiêu có thể nhận sát thương; không hạ entity Invulnerable hoặc người chơi Creative.', tags: ['vip','onehit'] }));
+
+  weaponProfiles.forEach(([w, name, enchants]) => {
+    enchants.forEach(([ench, lvl]) => {
+      cmds.push(cmd(`${name} — ${ench} ${lvl}`, `give @s minecraft:${w}{display:{Name:'${jsonName(name + ' ' + ench.toUpperCase(),'gold')}'},Enchantments:[{id:"minecraft:${ench}",lvl:${lvl}s}],Unbreakable:1b} 1`, { type: 'chat', desc: `${ench} là enchant tương thích với ${w} trong Java 1.20.1.`, tags: [w, ench] }));
+    });
+  });
+
+  // Combo enchants
+  const combos = [
+    ['netherite_sword', 'sharpness', 5, 'looting', 3, 'KIẾM ĐỒ SĂN'],
+    ['netherite_sword', 'sharpness', 5, 'sweeping', 3, 'KIẾM QUÉT'],
+    ['bow', 'power', 5, 'flame', 1, 'CUNG LỬA MAX'],
+    ['bow', 'power', 5, 'infinity', 1, 'CUNG VÔ HẠN'],
+    ['crossbow', 'multishot', 1, 'quick_charge', 3, 'NỎ 3 PHÁT'],
+    ['crossbow', 'piercing', 4, 'quick_charge', 3, 'NỎ XUYÊN'],
+    ['netherite_axe', 'sharpness', 5, 'efficiency', 5, 'RÌU CHẶT'],
+    ['trident', 'loyalty', 3, 'impaling', 5, 'ĐINH BA BIỂN'],
+  ];
+  combos.forEach(([w, e1, l1, e2, l2, name]) => {
+    cmds.push(cmd(name, `give @s minecraft:${w}{display:{Name:'${jsonName(name,'aqua')}'},Enchantments:[{id:"minecraft:${e1}",lvl:${l1}s},{id:"minecraft:${e2}",lvl:${l2}s}],Unbreakable:1b} 1`, { type: 'chat', desc: `Combo tương thích ${e1} + ${e2}.`, tags: [w] }));
+  });
+
+  return cmds;
+}
+
+function genArmor() {
+  const cmds = [];
+  const mats = ['leather','iron','diamond','netherite'];
+  const matNames = ['Da','Sắt','Kim Cương','Netherite'];
+  const pieces = ['helmet','chestplate','leggings','boots'];
+  const pieceNames = ['Mũ','Áo','Quần','Giày'];
+  const enchants = ['protection','blast_protection','projectile_protection','fire_protection','thorns','unbreaking','mending'];
+
+  mats.forEach((mat, mi) => {
+    pieces.forEach((piece, pi) => {
+      enchants.forEach(ench => {
+        [1,2,3,4,5].forEach(lvl => {
+          if (ench === 'mending' && lvl > 1) return;
+          if (ench === 'thorns' && lvl > 3) return;
+          cmds.push(cmd(`${matNames[mi]} ${pieceNames[pi]} ${ench} ${lvl}`, `give @s minecraft:${mat}_${piece}{Enchantments:[{id:"${ench}",lvl:${lvl}s}],Unbreakable:1b} 1`, { type: 'chat', desc: `Giáp ${mat} ${piece} — ${ench} ${lvl}.`, tags: [mat, piece, ench] }));
+        });
+      });
+    });
+  });
+
+  // Individual helmet shortcuts (a full equipped set requires four commands)
+  mats.forEach((mat, i) => {
+    cmds.push(cmd(`Mũ ${matNames[i]} Protection IV`, `give @s minecraft:${mat}_helmet{Enchantments:[{id:"minecraft:protection",lvl:4s}]} 1`, { type: 'chat', desc: `Chỉ cấp mũ ${matNames[i]}; chọn từng phần giáp phía trên để đủ bộ.`, tags: ['helmet', mat] }));
+  });
+
+  return cmds;
+}
+
+function genItems() {
+  const cmds = [];
+  const items = [
+    ['diamond', 64, 'Kim cương'],
+    ['emerald', 64, 'Ngọc lục bảo'],
+    ['gold_ingot', 64, 'Vàng'],
+    ['iron_ingot', 64, 'Sắt'],
+    ['netherite_ingot', 64, 'Netherite'],
+    ['enchanted_golden_apple', 64, 'Táo vàng phù phép'],
+    ['golden_apple', 64, 'Táo vàng'],
+    ['totem_of_undying', 64, 'Totem'],
+    ['elytra', 1, 'Elytra'],
+    ['firework_rocket', 64, 'Pháo hoa bay'],
+    ['ender_pearl', 64, 'Ngọc Ender'],
+    ['experience_bottle', 64, 'Chai EXP'],
+    ['torch', 64, 'Đuốc'],
+    ['cooked_beef', 64, 'Bò nướng'],
+    ['arrow', 64, 'Tên'],
+    ['spectral_arrow', 64, 'Tên spectral'],
+    ['tipped_arrow{Potion:"minecraft:strong_harming"}', 64, 'Tên Harming II'],
+  ];
+  items.forEach(([id, count, name]) => {
+    cmds.push(cmd(`Give ${name} x${count}`, `give @s minecraft:${id} ${count}`, { type: 'chat', desc: `Cấp ${count} ${name}.`, tags: [id] }));
+  });
+
+  // Elytra variants
+  [['unbreaking',3],['mending',1]].forEach(([e, level]) => {
+    cmds.push(cmd(`Elytra ${e}`, `give @s minecraft:elytra{Enchantments:[{id:"minecraft:${e}",lvl:${level}s}],Unbreakable:1b} 1`, { type: 'chat', desc: `Elytra phù phép ${e} cấp ${level}.` }));
+  });
+
+  return cmds;
+}
+
+function genMobs() {
+  const cmds = [];
+  const mobs = [
+    'zombie','skeleton','creeper','spider','cave_spider','enderman','witch',
+    'blaze','ghast','piglin','piglin_brute','hoglin','zoglin','drowned','husk',
+    'stray','phantom','vex','pillager','vindicator','evoker','ravager',
+    'wither_skeleton','silverfish','slime','magma_cube','guardian','elder_guardian',
+    'shulker','endermite','zombified_piglin','bee','illusioner',
+  ];
+  const presets = [
+    { suffix: 'PRO 100 HP', hp: 100, inv: false, color: 'green' },
+    { suffix: 'TANK 500 HP', hp: 500, inv: false, color: 'gold' },
+    { suffix: 'BẤT TỬ', hp: 1024, inv: true, color: 'red' },
+  ];
+
+  mobs.forEach(mob => {
+    presets.forEach(p => {
+      const inv = p.inv ? ',Invulnerable:1b' : '';
+      const name = mob.toUpperCase().replace(/_/g, ' ');
+      cmds.push(cmd(`${name} ${p.suffix}`, `execute at @p run summon minecraft:${mob} ~ ~1 ~ {Tags:["cheat_mode"],PersistenceRequired:1b,CustomName:'${jsonName(name + ' ' + p.suffix, p.color, { underlined: true })}',CustomNameVisible:1b,Health:${p.hp}f,Attributes:[${vipAttrs(p.hp)}]${inv}}`, { type: 'both', desc: `${mob} có ${p.hp} HP. Không sửa attack_damage vì nhiều mob tầm xa/nổ không sử dụng thuộc tính đó.`, tags: [mob, 'summon'] }));
+    });
+  });
+
+  return cmds;
+}
+
+function genBosses() {
+  const cmds = [];
+  const bosses = [
+    ['wither', 'PHÁP VƯƠNG WITHER', 1024],
+    ['ender_dragon', 'RỒNG ENDER', 1024],
+    ['warden', 'WARDEN THẦN THOẠI', 1024],
+  ];
+  bosses.forEach(([mob, name, hp]) => {
+    cmds.push(cmd(name, `execute at @p run summon minecraft:${mob} ~ ~1 ~ {Tags:["cheat_mode"],CustomName:'${jsonName(name,'dark_red',{underlined:true})}',CustomNameVisible:1b,Health:${hp}f,Attributes:[${vipAttrs(hp)}],PersistenceRequired:1b}`, { type: 'both', desc: `Boss ${name} có ${hp} HP và vẫn có thể chiến đấu/hạ gục. Sát thương đặc biệt của boss không dùng generic.attack_damage.`, tags: ['boss', mob] }));
+  });
+
+  // Johnny vindicator
+  cmds.push(cmd('JOHNNY VINDICATOR', `execute at @p run summon minecraft:vindicator ~ ~1 ~ {Tags:["cheat_mode"],CustomName:'${jsonName('JOHNNY','red')}',Johnny:1b,Health:500f,Attributes:[${vipAttrs(500,100)}]}`, { type: 'both', desc: 'Vindicator Johnny 500 HP / 100 attack_damage — đánh nhiều loại mob.', tags: ['boss'] }));
+
+  // Chúa tể zombie từ user
+  cmds.push(cmd('CHÚA TỂ ZOMBIE THẦN THOẠI', `execute at @p run summon minecraft:zombie ~ ~1 ~ {Tags:["cheat_mode"],PersistenceRequired:1b,IsBaby:0b,CanBreakDoors:1b,CustomName:'${jsonName('CHÚA TỂ ZOMBIE THẦN THOẠI','dark_red',{underlined:true})}',CustomNameVisible:1b,Health:1024f,Attributes:[${vipAttrs(1024,500)},{Name:"minecraft:generic.movement_speed",Base:0.5d},{Name:"minecraft:generic.knockback_resistance",Base:1.0d}],HandItems:[{id:"minecraft:netherite_axe",Count:1b,tag:{Enchantments:[{id:"minecraft:sharpness",lvl:5s}],Unbreakable:1b}},{}],ArmorItems:[${netherArmor120()}],ArmorDropChances:[0.0f,0.0f,0.0f,0.0f],HandDropChances:[0.0f,0.0f]}`, { type: 'both', desc: 'Zombie 1024 HP, 500 attack_damage, nhanh và kháng đẩy. Java 1.20.1 không có thuộc tính scale nên không quảng cáo kích thước giả.', tags: ['boss','zombie','vip'] }));
+
+  return cmds;
+}
+
+function genPets() {
+  const cmds = [];
+  // Thần khuyển từ user
+  cmds.push(cmd('THẦN KHUYỂN MAX VIP', `execute at @p run summon minecraft:wolf ~ ~ ~ {Tags:["sieukhuyen","cheat_mode"],CustomName:'${jsonName('THẦN KHUYỂN MAX VIP','red',{underlined:true})}',CustomNameVisible:1b,Health:1024f,Attributes:[${vipAttrs(1024,100)}],${vipEffects()}}`, { type: 'both', desc: 'Sói 1024 HP / 100 attack_damage — chạy thêm lệnh Owner bên dưới.', tags: ['wolf','pet'] }));
+  cmds.push(cmd('Gán Owner cho THẦN KHUYỂN', `execute as @e[type=minecraft:wolf,tag=sieukhuyen] at @s run data modify entity @s Owner set from entity @p UUID`, { type: 'chat', desc: 'Mỗi sói nhận người chơi gần chính nó nhất làm chủ.', tags: ['wolf'] }));
+  cmds.push(cmd('Cho sói NGỒI', `execute as @e[tag=sieukhuyen] run data modify entity @s Sitting set value 1b`, { type: 'chat', desc: 'Lệnh ngồi cho sói tag sieukhuyen.' }));
+  cmds.push(cmd('Cho sói ĐỨNG', `execute as @e[tag=sieukhuyen] run data modify entity @s Sitting set value 0b`, { type: 'chat', desc: 'Lệnh đứng dậy.' }));
+
+  const pets = ['wolf','cat','parrot','fox','horse','donkey','mule','llama','camel','axolotl'];
+  const variants = ['100 HP','500 HP','1024 HP'];
+  pets.forEach(pet => {
+    variants.forEach((v, i) => {
+      const hp = [100, 500, 1024][i];
+      cmds.push(cmd(`${pet.toUpperCase()} ${v}`, `execute at @p run summon minecraft:${pet} ~ ~1 ~ {Tags:["cheat_mode"],CustomName:'${jsonName(pet.toUpperCase() + ' ' + v,'green')}',CustomNameVisible:1b,Health:${hp}f,Attributes:[${vipAttrs(hp)}],PersistenceRequired:1b}`, { type: 'both', desc: `${pet} có ${hp} HP. Không thêm scale vì Java 1.20.1 không hỗ trợ thuộc tính đó.`, tags: [pet, 'pet'] }));
+    });
+  });
+
+  return cmds;
+}
+
+function genVillagers() {
+  const cmds = [];
+  cmds.push(cmd('SIÊU DÂN LÀNG (1.20.1)', `summon minecraft:villager ~ ~1 ~ {Tags:["cheat_mode"],Invulnerable:1b,PersistenceRequired:1b,CustomName:'${jsonName('SIÊU DÂN LÀNG VIP','green')}',CustomNameVisible:1b,Health:1024f,Attributes:[${vipAttrs(1024)}],VillagerData:{profession:"minecraft:none",level:5,type:"minecraft:plains"},ArmorItems:[${netherArmor120()}],ArmorDropChances:[0.0f,0.0f,0.0f,0.0f]}`, { type: 'both', desc: 'Dân làng không nghề, bất tử. Armor NBT tồn tại nhưng dân làng vanilla không hiển thị như giáp người chơi.', version: '1.20.1' }));
+
+  cmds.push(cmd('PHÁP SƯ EVOKER VIP', `summon minecraft:evoker ~ ~1 ~ {Tags:["cheat_mode"],Invulnerable:1b,PersistenceRequired:1b,CustomName:'${jsonName('PHÁP SƯ EVOKER VIP','gold')}',CustomNameVisible:1b,Health:1024f,Attributes:[${vipAttrs(1024)}]}`, { type: 'both', desc: 'Evoker bất tử 1024 HP; Johnny chỉ áp dụng cho vindicator nên không dùng ở đây.', tags: ['evoker'] }));
+
+  const professions = ['armorer','butcher','cartographer','cleric','farmer','fisherman','fletcher','leatherworker','librarian','mason','shepherd','toolsmith','weaponsmith','nitwit','none'];
+  professions.forEach(prof => {
+    cmds.push(cmd(`Dân làng nghề ${prof}`, `summon minecraft:villager ~ ~1 ~ {VillagerData:{profession:"minecraft:${prof}",level:5,type:"minecraft:plains"},CustomName:'${jsonName('DÂN LÀNG ' + prof.toUpperCase(),'yellow')}',CustomNameVisible:1b,NoAI:0b}`, { type: 'both', desc: `Dân làng có profession ${prof} và level 5; lệnh không tự tạo Offers/giao dịch.`, tags: ['villager', prof] }));
+  });
+
+  return cmds;
+}
+
+function genGuards() {
+  const cmds = [];
+  const ownerNbt = uuidToIntArray();
+  const base = (name, extra = '') =>
+    `summon guardvillagers:guard ~ ~1 ~ {Tags:["cheat_mode"],Following:1b,Owner:${ownerNbt},Invulnerable:1b,CustomName:'${jsonName(name,'gold')}',CustomNameVisible:1b,Health:1024f,Attributes:[${vipAttrs(1024,500)}]${extra}}`;
+
+  cmds.push(cmd('LÍNH GÁC MAX VIP', base('ĐẠI ĐỘI LÍNH GÁC MAX VIP'), { type: 'both', desc: 'Owner dùng UUID int-array đúng kiểu NBT. Follow còn phụ thuộc Hero of the Village hoặc cấu hình followHero của mod.', tags: ['guard'], version: 'Mod Guard Villagers 1.20.1' }));
+  cmds.push(cmd('LÍNH GÁC cách 50 ô', `summon guardvillagers:guard ~50 ~ ~ {Tags:["cheat_mode"],Following:1b,Owner:${ownerNbt},Invulnerable:1b,CustomName:'${jsonName('LÍNH GÁC XA 50','gold')}',CustomNameVisible:1b,Health:1024f,Attributes:[${vipAttrs(1024,500)}]}`, { type: 'block', desc: 'Spawn cách command block 50 block. Follow cần Hero of the Village nếu config followHero đang bật.', tags: ['guard'], version: 'Mod Guard Villagers 1.20.1' }));
+
+  // Weapons
+  const weapons = [
+    ['minecraft:crossbow{Enchantments:[{id:"minecraft:multishot",lvl:1s},{id:"minecraft:quick_charge",lvl:3s},{id:"minecraft:unbreaking",lvl:3s}]}', 'NỎ MULTISHOT'],
+    ['minecraft:crossbow{Enchantments:[{id:"minecraft:piercing",lvl:4s},{id:"minecraft:quick_charge",lvl:3s},{id:"minecraft:unbreaking",lvl:3s}]}', 'NỎ PIERCING IV'],
+    ['minecraft:bow{Enchantments:[{id:"power",lvl:5s},{id:"flame",lvl:1s},{id:"infinity",lvl:1s}]}', 'CUNG POWER V'],
+    ['minecraft:netherite_sword{Enchantments:[{id:"minecraft:sharpness",lvl:5s},{id:"minecraft:sweeping",lvl:3s}]}', 'KIẾM NETHERITE'],
+    ['minecraft:iron_sword', 'KIẾM SẮT'],
+    ['minecraft:netherite_axe{Enchantments:[{id:"sharpness",lvl:5s}]}', 'RÌU NETHERITE'],
+    ['tacz:modern_kinetic_gun{GunId:"tacz:hk_mp5a5",GunCurrentAmmoCount:30,HasBulletInBarrel:1b,GunFireMode:"AUTO"}', 'MP5 TaCZ (cầm được, không bắn)'],
+  ];
+  weapons.forEach(([item, name]) => {
+    const gunWarning = item.startsWith('tacz:')
+      ? 'Guard chỉ cầm được; AI Guard Villagers không bắn TaCZ nếu thiếu mod tương thích.'
+      : 'Bow/Crossbow được AI tầm xa nhận diện; vật phẩm cận chiến dùng như melee.';
+    cmds.push(cmd(`Guard cầm ${name}`, `execute as @e[type=guardvillagers:guard] run item replace entity @s weapon.mainhand with ${item}`, { type: 'chat', desc: gunWarning, tags: ['guard', 'weapon'], version: 'Mod Guard Villagers 1.20.1' }));
+  });
+
+  cmds.push(cmd('Guard bước 1: gán Owner gần nhất', `execute as @e[type=guardvillagers:guard,distance=..100] at @s run data modify entity @s Owner set from entity @p UUID`, { type: 'chat', desc: 'Sao chép UUID đúng kiểu dữ liệu từ người chơi gần từng guard.', version: 'Mod Guard Villagers 1.20.1' }));
+  cmds.push(cmd('Guard bước 2: bật Following', `execute as @e[type=guardvillagers:guard,distance=..100] run data merge entity @s {Following:1b}`, { type: 'chat', desc: 'Cần Hero of the Village khi followHero=true trong config mod.', version: 'Mod Guard Villagers 1.20.1' }));
+  cmds.push(cmd('Nhận Hero of the Village để Guard follow', `effect give @s minecraft:hero_of_the_village 999999 0 true`, { type: 'chat', desc: 'Guard Villagers 1.20.1 mặc định có thể yêu cầu chủ sở hữu giữ hiệu ứng này khi followHero=true.', version: 'Mod Guard Villagers 1.20.1' }));
+  cmds.push(cmd('Guard tay phụ đuốc', `execute at @p as @e[type=guardvillagers:guard,distance=..50] run item replace entity @s weapon.offhand with minecraft:torch`, { type: 'chat', desc: 'Cấp đuốc tay phụ.', version: 'Mod' }));
+  [['feet','boots'],['legs','leggings'],['chest','chestplate'],['head','helmet']].forEach(([slot, piece]) => {
+    cmds.push(cmd(`Guard giáp ${piece} Netherite`, `execute at @p as @e[type=guardvillagers:guard,distance=..50] run item replace entity @s armor.${slot} with minecraft:netherite_${piece}{Enchantments:[{id:"minecraft:protection",lvl:4s},{id:"minecraft:unbreaking",lvl:3s}]}`, { type: 'chat', desc: `Trang bị ${piece}; chạy đủ bốn lệnh để có full set.`, version: 'Mod Guard Villagers 1.20.1' }));
+  });
+  cmds.push(cmd('Guard max HP', `execute at @p as @e[type=guardvillagers:guard,distance=..50] run attribute @s minecraft:generic.max_health base set 1024`, { type: 'chat', desc: 'Đặt max health; chạy thêm lệnh hồi máu để lấp đầy.', version: 'Mod' }));
+  cmds.push(cmd('Guard attack 500', `execute at @p as @e[type=guardvillagers:guard,distance=..50] run attribute @s minecraft:generic.attack_damage base set 500`, { type: 'chat', version: 'Mod' }));
+  cmds.push(cmd('Guard hồi full máu', `execute at @p as @e[type=guardvillagers:guard,distance=..50] run data merge entity @s {Health:1024f,Invulnerable:1b}`, { type: 'chat', version: 'Mod' }));
+  cmds.push(cmd('Tắt follow guard', `execute as @e[type=guardvillagers:guard] run data merge entity @s {Following:0b}`, { type: 'chat', version: 'Mod' }));
+  cmds.push(cmd('Xóa tất cả guard', `kill @e[type=guardvillagers:guard]`, { type: 'chat', desc: 'Xóa guard — /kill vẫn hoạt động dù Invulnerable.', version: 'Mod' }));
+
+  // Spawn 50 guards loop
+  cmds.push(cmd('Spawn 50 guard (scoreboard)', `scoreboard objectives add guard_spawn dummy`, { type: 'chat', desc: 'Bước 1: tạo scoreboard.', version: 'Mod' }));
+  cmds.push(cmd('Spawn 50 guard bước 2', `scoreboard players set @s guard_spawn 50`, { type: 'chat', desc: 'Bước 2: đặt số lượng.', version: 'Mod' }));
+  cmds.push(cmd('Spawn 50 guard bước 3 — Repeat', `execute as @a[scores={guard_spawn=1..},limit=1] at @s run summon guardvillagers:guard ~ ~1 ~ {Tags:["cheat_mode"],Following:1b,Owner:${ownerNbt}}`, { type: 'block', desc: 'Đặt trong khối Repeat / Always Active hoặc Need Redstone.', version: 'Mod Guard Villagers 1.20.1' }));
+  cmds.push(cmd('Spawn 50 guard bước 4 — Chain', `scoreboard players remove @a[scores={guard_spawn=1..},limit=1] guard_spawn 1`, { type: 'block', desc: 'Đặt Chain / Always Active sau khối Repeat để dừng chính xác ở 50.', version: 'Mod Guard Villagers 1.20.1' }));
+
+  return cmds;
+}
+
+function genTacz() {
+  const cmds = [];
+  const guns = [
+    ['tacz:hk_mp5a5', 'MP5A5', 30, 'AUTO'],
+    ['tacz:ak47', 'AK47', 30, 'AUTO'],
+    ['tacz:m4a1', 'M4A1', 30, 'AUTO'],
+    ['tacz:deagle', 'Desert Eagle', 7, 'SEMI'],
+    ['tacz:ai_awp', 'AWP', 5, 'SEMI'],
+    ['tacz:glock_17', 'Glock 17', 17, 'SEMI'],
+  ];
+  guns.forEach(([id, name, capacity, fireMode]) => {
+    cmds.push(cmd(`Give súng ${name}`, `give @s tacz:modern_kinetic_gun{GunId:"${id}",GunCurrentAmmoCount:${capacity},HasBulletInBarrel:1b,GunFireMode:"${fireMode}"} 1`, { type: 'chat', desc: `${name}: ${capacity} viên, chế độ ${fireMode}. Nhấn R để nạp đạn.`, tags: ['tacz', 'gun'], version: 'Mod TaCZ 1.20.1 default pack' }));
+  });
+
+  const ammos = [
+    ['tacz:9mm', '9mm'],
+    ['tacz:762x39', '7.62x39'],
+    ['tacz:556x45', '5.56x45'],
+    ['tacz:50ae', '.50 AE'],
+    ['tacz:338', '.338 (AWP)'],
+    ['tacz:308', '.308'],
+  ];
+  ammos.forEach(([id, name]) => {
+    cmds.push(cmd(`Đạn ${name} x64`, `give @s tacz:ammo{AmmoId:"${id}"} 64`, { type: 'chat', desc: `Đạn ${name} cho TaCZ.`, tags: ['tacz', 'ammo'], version: 'Mod TaCZ' }));
+    cmds.push(cmd(`Hộp đạn ${name}`, `give @s tacz:ammo_box{AmmoId:"${id}",AmmoCount:300} 1`, { type: 'chat', desc: `Hộp đạn 300 viên ${name}.`, version: 'Mod TaCZ' }));
+    cmds.push(cmd(`Hộp đạn ${name} Creative`, `give @s tacz:ammo_box{Creative:1b,AmmoId:"${id}"} 1`, { type: 'chat', desc: 'Hộp đạn vô hạn (creative box).', version: 'Mod TaCZ' }));
+  });
+
+  return cmds;
+}
+
+function genGolems() {
+  const cmds = [];
+  cmds.push(cmd('THẦN HỘ VỆ GOLEM MAX VIP', `summon minecraft:iron_golem ~ ~1 ~ {Tags:["cheat_mode"],Invulnerable:1b,PersistenceRequired:1b,CustomName:'${jsonName('THẦN HỘ VỆ GOLEM MAX VIP','gold',{underlined:true})}',CustomNameVisible:1b,Health:1024f,Attributes:[${vipAttrs(1024,500)}]}`, { type: 'both', desc: 'Golem bất tử; 1024 HP chỉ để hiển thị vì Invulnerable chặn sát thương thường.', tags: ['golem'] }));
+  cmds.push(cmd('Golem tại người chơi', `execute at @p run summon minecraft:iron_golem ~ ~1 ~ {Tags:["cheat_mode"],CustomName:'${jsonName('GOLEM HỘ VỆ','white')}',CustomNameVisible:1b,Health:500f,Attributes:[${vipAttrs(500)}]}`, { type: 'both', desc: 'Golem 500 HP tại người chơi gần nhất.' }));
+  cmds.push(cmd('Snow Golem VIP', `execute at @p run summon snow_golem ~ ~1 ~ {CustomName:'${jsonName('GOLEM TUYẾT VIP','aqua')}',CustomNameVisible:1b}`, { type: 'both', desc: 'Golem tuyết ném tuyết.' }));
+
+  [100, 256, 512, 1024].forEach(hp => {
+    cmds.push(cmd(`Golem ${hp} HP`, `summon minecraft:iron_golem ~ ~1 ~ {Tags:["cheat_mode"],Health:${hp}f,Attributes:[${vipAttrs(hp)}]}`, { type: 'both', desc: `Golem có ${hp} HP và vẫn nhận sát thương.`, tags: ['golem'] }));
+  });
+
+  return cmds;
+}
+
+function genEffects() {
+  const cmds = [];
+  const effects = [
+    ['strength', 'Sức mạnh'], ['speed', 'Tốc độ'], ['resistance', 'Kháng sát thương'],
+    ['regeneration', 'Hồi máu'], ['absorption', 'Hấp thụ'], ['health_boost', 'Tăng máu'],
+    ['fire_resistance', 'Kháng lửa'], ['water_breathing', 'Thở dưới nước'],
+    ['night_vision', 'Nhìn đêm'], ['invisibility', 'Tàng hình'], ['jump_boost', 'Nhảy cao'],
+    ['slow_falling', 'Rơi chậm'], ['luck', 'May mắn'], ['haste', 'Đào nhanh'],
+    ['conduit_power', 'Sức mạnh đường ống'], ['dolphins_grace', 'Cá heo'],
+    ['glowing', 'Phát sáng'], ['levitation', 'Bay lên'], ['wither', 'Wither'],
+    ['poison', 'Độc'], ['weakness', 'Yếu'], ['slowness', 'Chậm'],
+    ['blindness', 'Mù'], ['hunger', 'Đói'], ['nausea', 'Buồn nôn'],
+  ];
+
+  effects.forEach(([id, name]) => {
+    [1, 2, 5, 10].forEach(level => {
+      [60, 600, 6000, 999999].forEach(dur => {
+        const amplifier = level - 1;
+        cmds.push(cmd(`${name} cấp ${level} — ${dur}s`, `effect give @s minecraft:${id} ${dur} ${amplifier} true`, { type: 'chat', desc: `Hiệu ứng ${name} cấp ${level}; amplifier trong lệnh là ${amplifier} vì Minecraft đếm từ 0.`, tags: [id, 'effect'] }));
+        cmds.push(cmd(`${name} cho @p cấp ${level}`, `effect give @p minecraft:${id} ${dur} ${amplifier} true`, { type: 'chat', desc: `Cho người chơi gần nhất hiệu ứng cấp ${level}.`, tags: [id] }));
+      });
+    });
+  });
+
+  cmds.push(cmd('Xóa tất cả hiệu ứng', `effect clear @s`, { type: 'chat', desc: 'Xóa mọi effect trên bạn.' }));
+  cmds.push(cmd('Buff Strength X', `effect give @s minecraft:strength 999999 9 true`, { type: 'chat', desc: 'Strength cấp 10 dùng amplifier 9.' }));
+
+  return cmds;
+}
+
+function genTeleport() {
+  const cmds = [];
+  [[0,100,0],[100,100,100],[-100,80,-100],[1000,100,1000]].forEach(([x,y,z]) => {
+    cmds.push(cmd(`TP đến ${x} ${y} ${z}`, `tp @s ${x} ${y} ${z}`, { type: 'chat', desc: `Dịch chuyển đến tọa độ ${x} ${y} ${z}.`, tags: ['tp'] }));
+  });
+  cmds.push(cmd('TP lên trời', `tp @s ~ 200 ~`, { type: 'chat', desc: 'Bay lên Y=200.' }));
+  cmds.push(cmd('TP lên mặt đất theo heightmap', `execute at @s positioned over motion_blocking_no_leaves run tp @s ~ ~ ~`, { type: 'chat', desc: 'Đưa bạn tới block cao nhất tại X/Z hiện tại; vẫn cần cẩn thận với mái nhà, nước và vật cản.' }));
+  cmds.push(cmd('TP đến người chơi khác', `tp @s PlayerName`, { type: 'chat', desc: 'Thay PlayerName bằng tên thật.' }));
+  cmds.push(cmd('Đưa người chơi đến mình', `tp PlayerName @s`, { type: 'chat', desc: 'Kéo người chơi đến vị trí bạn.' }));
+
+  // Relative TP grid
+  for (let dx = -5; dx <= 5; dx += 5) {
+    for (let dz = -5; dz <= 5; dz += 5) {
+      if (dx === 0 && dz === 0) continue;
+      cmds.push(cmd(`TP tương đối ${dx} ${dz}`, `tp @s ~${dx} ~ ~${dz}`, { type: 'chat', desc: `Dịch chuyển ${dx} ${dz} block.`, tags: ['tp'] }));
+    }
+  }
+
+  return cmds;
+}
+
+function genBuild() {
+  const cmds = [];
+  // Từ user
+  cmds.push(cmd('Nhà gỗ sồi 20×15×20 rỗng', `fill ~ ~ ~ ~19 ~14 ~19 minecraft:oak_planks hollow`, { type: 'both', desc: 'Tọa độ /fill tính cả hai đầu nên điểm cuối là 19/14/19.', tags: ['fill','nha'] }));
+  cmds.push(cmd('Xóa nội thất nhà 20×15×20', `fill ~1 ~1 ~1 ~18 ~13 ~18 minecraft:air`, { type: 'both', desc: 'Xóa phần bên trong sau khi dựng khung.', tags: ['fill'] }));
+
+  const materials = [
+    'stone_bricks','deepslate_bricks','quartz_block','obsidian','glass',
+    'oak_planks','spruce_planks','birch_planks','dark_oak_planks',
+    'iron_block','gold_block','diamond_block','netherite_block',
+    'glowstone','sea_lantern','end_stone_bricks','purpur_block',
+  ];
+  const sizes = [5, 10, 15, 20, 30, 50];
+  materials.forEach(mat => {
+    sizes.forEach(s => {
+      const h = Math.max(1, Math.floor(s / 2));
+      const volume = s * h * s;
+      if (volume <= 32768) {
+        cmds.push(cmd(`Hộp ${mat} ${s}×${h}×${s}`, `fill ~ ~ ~ ~${s - 1} ~${h - 1} ~${s - 1} minecraft:${mat} hollow`, { type: 'both', desc: `Khung ${mat} đúng ${s}×${h}×${s}.`, tags: ['fill', mat] }));
+      }
+      cmds.push(cmd(`Sàn ${mat} ${s}×${s}`, `fill ~ ~-1 ~ ~${s - 1} ~-1 ~${s - 1} minecraft:${mat}`, { type: 'both', desc: `Lát sàn ${mat} đúng ${s}×${s}.`, tags: ['fill'] }));
+      cmds.push(cmd(`Tường ${mat} ${s}×${s}`, `fill ~ ~ ~ ~${s - 1} ~${s - 1} ~ minecraft:${mat}`, { type: 'both', desc: `Tường rộng ${s}, cao ${s}.`, tags: ['fill'] }));
+    });
+  });
+
+  cmds.push(cmd('Xóa vùng 10×10×10', `fill ~ ~ ~ ~9 ~9 ~9 minecraft:air`, { type: 'both', desc: 'Xóa chính xác 1.000 block.', tags: ['fill'] }));
+  cmds.push(cmd('Đặt nền bedrock 50×50', `fill ~ ~-1 ~ ~49 ~-1 ~49 minecraft:bedrock`, { type: 'both', desc: 'Nền bedrock chính xác 50×50.', tags: ['fill'] }));
+
+  return cmds;
+}
+
+function genWeather() {
+  const cmds = [];
+  ['clear','rain','thunder'].forEach(w => {
+    cmds.push(cmd(`Thời tiết: ${w}`, `weather ${w}`, { type: 'chat', desc: `Đặt thời tiết ${w}.` }));
+    [100, 1000, 10000, 1000000].forEach(t => {
+      cmds.push(cmd(`Thời tiết ${w} ${t}s`, `weather ${w} ${t}`, { type: 'chat', desc: `Thời tiết ${w} trong ${t} giây.` }));
+    });
+  });
+  [0, 1000, 6000, 12000, 18000].forEach(t => {
+    cmds.push(cmd(`Thời gian ${t} tick`, `time set ${t}`, { type: 'chat', desc: `Đặt thời gian — 0=sáng, 6000=trưa, 12000=hoàng hôn, 18000=đêm.` }));
+  });
+  cmds.push(cmd('Đóng băng thời gian hiện tại', `gamerule doDaylightCycle false`, { type: 'chat', desc: 'Dừng chu kỳ tại thời điểm hiện tại. Muốn đêm vĩnh viễn: chạy /time set night trước.' }));
+  cmds.push(cmd('Bật chu kỳ ngày đêm', `gamerule doDaylightCycle true`, { type: 'chat' }));
+  return cmds;
+}
+
+function genCombat() {
+  const cmds = [];
+  cmds.push(cmd('⚠️ Xóa mọi entity trừ player', `kill @e[type=!player]`, { type: 'chat', desc: 'Rất nguy hiểm: xóa mob, thú nuôi, item, armor stand, thuyền, minecart, tranh và marker — kể cả Invulnerable.', tags: ['kill','destructive'] }));
+  cmds.push(cmd('Kill riêng mob Cheat Mode', `kill @e[tag=cheat_mode]`, { type: 'chat', desc: 'Cách dọn an toàn các mob tạo từ mục Ma Trận Triệu Hồi.', tags: ['kill','cheat_mode'] }));
+  cmds.push(cmd('Kill zombie', `kill @e[type=zombie]`, { type: 'chat', tags: ['kill'] }));
+  cmds.push(cmd('Kill skeleton', `kill @e[type=skeleton]`, { type: 'chat', tags: ['kill'] }));
+  cmds.push(cmd('Kill guard', `kill @e[type=guardvillagers:guard]`, { type: 'chat', tags: ['kill','mod'] }));
+  cmds.push(cmd('Kill item rơi', `kill @e[type=item]`, { type: 'chat', desc: 'Dọn item lag.', tags: ['kill'] }));
+  cmds.push(cmd('Kill xp orb', `kill @e[type=experience_orb]`, { type: 'chat', tags: ['kill'] }));
+  cmds.push(cmd('Kill arrow', `kill @e[type=arrow]`, { type: 'chat', tags: ['kill'] }));
+  cmds.push(cmd('Clear inventory', `clear @s`, { type: 'chat', desc: 'Xóa toàn bộ túi đồ.' }));
+  cmds.push(cmd('Hồi máu tức thì mạnh', `effect give @s minecraft:instant_health 1 4 true`, { type: 'chat', desc: 'Instant Health V; tránh amplifier 255 vì có thể gây overflow.' }));
+
+  const mobs = ['zombie','skeleton','creeper','spider','enderman','phantom','witch','pillager'];
+  mobs.forEach(m => {
+    cmds.push(cmd(`Kill ${m} trong 50 block`, `kill @e[type=${m},distance=..50]`, { type: 'chat', tags: ['kill', m] }));
+  });
+
+  return cmds;
+}
+
+function genScoreboard() {
+  const cmds = [];
+  const objectives = ['guard_spawn','loop','counter','timer','wave','kill_count'];
+  objectives.forEach(obj => {
+    cmds.push(cmd(`Tạo scoreboard ${obj}`, `scoreboard objectives add ${obj} dummy`, { type: 'chat', desc: `Tạo objective ${obj}.`, tags: ['scoreboard'] }));
+    [1,5,10,25,50,100].forEach(n => {
+      cmds.push(cmd(`Set ${obj} = ${n}`, `scoreboard players set @s ${obj} ${n}`, { type: 'chat', desc: `Đặt ${obj} = ${n}.`, tags: ['scoreboard'] }));
+    });
+    cmds.push(cmd(`Remove ${obj} -1`, `scoreboard players remove @s ${obj} 1`, { type: 'chat', tags: ['scoreboard'] }));
+  });
+  cmds.push(cmd('Hiện sidebar scoreboard', `scoreboard objectives setdisplay sidebar guard_spawn`, { type: 'chat', desc: 'Hiện điểm bên phải màn hình.' }));
+  return cmds;
+}
+
+function genFun() {
+  const cmds = [];
+  cmds.push(cmd('Pháo hoa bay', `give @s firework_rocket{Fireworks:{Flight:3b,Explosions:[{Type:1b,Colors:[I;16711680,16776960]}]}} 64`, { type: 'chat', desc: 'Pháo hoa đẹp.' }));
+  cmds.push(cmd('Spawn một con gà', `execute at @p run summon minecraft:chicken ~ ~1 ~`, { type: 'chat', desc: 'Mỗi lần chạy tạo đúng một con; muốn 100 con cần vòng lặp scoreboard có bộ đếm.' }));
+  cmds.push(cmd('Lightning trên đầu', `summon lightning_bolt ~ ~ ~`, { type: 'chat', desc: 'Sét đánh tại vị trí.' }));
+  cmds.push(cmd('Lightning trên @p', `execute at @p run summon lightning_bolt ~ ~ ~`, { type: 'chat', desc: 'Sét đánh người chơi.' }));
+  cmds.push(cmd('Ride pig', `summon pig ~ ~1 ~ {Saddle:1b}`, { type: 'chat', desc: 'Spawn lợn có yên — cưỡi thử.' }));
+  cmds.push(cmd('TNT spawn', `summon tnt ~ ~2 ~`, { type: 'chat', desc: 'TNT nổ — cẩn thận!' }));
+  cmds.push(cmd('Armor stand', `summon armor_stand ~ ~1 ~ {CustomName:'${jsonName('GIÁP ĐỠ VIP','gold')}',CustomNameVisible:1b,ShowArms:1b}`, { type: 'chat', desc: 'Armor stand trang trí.' }));
+  cmds.push(cmd('Title chào', `title @s title ${JSON.stringify({text:'CHÀO VIP PRO MAX',color:'gold',bold:true})}`, { type: 'chat', desc: 'Hiện title màn hình.' }));
+  cmds.push(cmd('Subtitle', `title @s subtitle ${JSON.stringify({text:'Minecraft Cheat',color:'yellow'})}`, { type: 'chat' }));
+  cmds.push(cmd('Playsound level up', `playsound minecraft:entity.player.levelup master @s ~ ~ ~ 1 1`, { type: 'chat', desc: 'Âm thanh lên cấp.' }));
+
+  // Particle spam
+  ['flame','heart','end_rod','soul_fire_flame','witch','happy_villager'].forEach(p => {
+    cmds.push(cmd(`Particle ${p}`, `particle minecraft:${p} ~ ~1 ~ 1 1 1 0.1 50`, { type: 'chat', desc: `Hiệu ứng hạt ${p}.`, tags: ['particle'] }));
+  });
+
+  return cmds;
+}
+
+function genAttributes() {
+  const cmds = [];
+  const profiles = [
+    {
+      label: 'bản thân', prefix: '', selector: '@s',
+      attrs: [
+        ['generic.max_health','Máu tối đa',[100,256,512,1024]],
+        ['generic.attack_damage','Sát thương',[10,50,100,500]],
+        ['generic.movement_speed','Tốc độ',[0.2,0.3,0.5,1]],
+        ['generic.knockback_resistance','Kháng đẩy',[0.5,0.8,1]],
+        ['generic.armor','Giáp',[10,20,30]],
+        ['generic.luck','May mắn',[1,5,10]],
+      ]
+    },
+    {
+      label: 'wolf', prefix: 'execute as @e[type=minecraft:wolf,distance=..50] run ', selector: '@s',
+      attrs: [
+        ['generic.max_health','Máu tối đa',[100,500,1024]],
+        ['generic.attack_damage','Sát thương',[10,50,100]],
+        ['generic.movement_speed','Tốc độ',[0.3,0.5,1]],
+      ]
+    },
+    {
+      label: 'guard', prefix: 'execute as @e[type=guardvillagers:guard,distance=..50] run ', selector: '@s',
+      attrs: [
+        ['generic.max_health','Máu tối đa',[100,500,1024]],
+        ['generic.attack_damage','Sát thương',[10,100,500]],
+        ['generic.movement_speed','Tốc độ',[0.3,0.5,1]],
+      ]
+    },
+  ];
+  profiles.forEach(profile => {
+    profile.attrs.forEach(([attr, name, values]) => {
+      values.forEach(value => {
+        const healNote = attr === 'generic.max_health' ? ' Thay max health không tự hồi đầy máu.' : '';
+        cmds.push(cmd(`${name} = ${value} (${profile.label})`, `${profile.prefix}attribute ${profile.selector} minecraft:${attr} base set ${value}`, { type: 'chat', desc: `Đặt ${name} = ${value} cho ${profile.label}.${healNote}`, tags: ['attribute', profile.label], version: profile.label === 'guard' ? 'Mod Guard Villagers 1.20.1' : '1.20.1' }));
+      });
+    });
+  });
+  return cmds;
+}
+
+function genBlocks() {
+  const cmds = [];
+  const blocks = [
+    'stone','granite','diorite','andesite','deepslate','cobbled_deepslate','tuff','calcite',
+    'dirt','grass_block','coarse_dirt','podzol','mycelium','mud','clay',
+    'sand','red_sand','gravel','soul_sand','soul_soil',
+    'oak_log','spruce_log','birch_log','jungle_log','acacia_log','dark_oak_log','cherry_log','mangrove_log',
+    'oak_planks','spruce_planks','birch_planks','jungle_planks','acacia_planks','dark_oak_planks',
+    'stone_bricks','mossy_stone_bricks','cracked_stone_bricks','deepslate_bricks','deepslate_tiles',
+    'bricks','mud_bricks','nether_bricks','red_nether_bricks','end_stone_bricks',
+    'sandstone','red_sandstone','smooth_sandstone','cut_sandstone',
+    'quartz_block','smooth_quartz','quartz_bricks','quartz_pillar',
+    'prismarine','prismarine_bricks','dark_prismarine','sea_lantern',
+    'obsidian','crying_obsidian','netherrack','basalt','blackstone','gilded_blackstone',
+    'iron_block','gold_block','diamond_block','emerald_block','netherite_block','lapis_block','redstone_block',
+    'coal_block','copper_block','exposed_copper','weathered_copper','oxidized_copper',
+    'amethyst_block','honey_block','slime_block','hay_block','bone_block','dried_kelp_block',
+    'white_wool','orange_wool','magenta_wool','light_blue_wool','yellow_wool','lime_wool',
+    'pink_wool','gray_wool','light_gray_wool','cyan_wool','purple_wool','blue_wool',
+    'brown_wool','green_wool','red_wool','black_wool',
+    'white_concrete','red_concrete','blue_concrete','green_concrete','yellow_concrete','black_concrete',
+    'white_terracotta','red_terracotta','blue_terracotta','green_terracotta',
+    'glass','tinted_glass','white_stained_glass','red_stained_glass','blue_stained_glass',
+    'glowstone','shroomlight','ochre_froglight','verdant_froglight','pearlescent_froglight',
+    'bookshelf','chiseled_bookshelf','lectern','crafting_table','furnace','blast_furnace','smoker',
+    'anvil','enchanting_table','ender_chest','beacon','conduit','respawn_anchor',
+    'spawner',
+    'rail','powered_rail','detector_rail','activator_rail',
+    'redstone_lamp','piston','sticky_piston','observer','hopper','dropper','dispenser',
+    'tnt','bedrock','barrier','structure_block','jigsaw','light',
+  ];
+  const counts = [1, 16, 32, 64];
+  blocks.forEach(b => {
+    counts.forEach(n => {
+      cmds.push(cmd(`Give ${b} x${n}`, `give @s minecraft:${b} ${n}`, { type: 'chat', desc: `Cấp ${n} block ${b}.`, tags: [b, 'block'] }));
+    });
+  });
+  return cmds;
+}
+
+function genMegaSummon() {
+  const cmds = [];
+  const mobs = [
+    'zombie','skeleton','creeper','spider','enderman','witch','blaze','ghast',
+    'piglin','drowned','husk','stray','phantom','pillager','vindicator','evoker',
+    'ravager','wither_skeleton','slime','magma_cube','guardian','shulker','warden',
+    'wolf','cat','horse','iron_golem','snow_golem','bee','fox','polar_bear','goat',
+  ];
+  const colors = ['red','gold','green','blue','aqua','dark_purple','light_purple','white','dark_red','yellow','dark_green'];
+  const positions = [
+    { label: 'tại chỗ', xyz: '~ ~1 ~' },
+    { label: 'Đông 10', xyz: '~10 ~ ~' },
+    { label: 'Đông 50', xyz: '~50 ~ ~' },
+    { label: 'trên cao 10', xyz: '~ ~10 ~' },
+    { label: 'vòng đấu', xyz: '~20 ~ ~20' },
+  ];
+  const behaviors = [
+    { label: 'AI', nbt: 'NoAI:0b' },
+    { label: 'Đứng yên', nbt: 'NoAI:1b' },
+  ];
+  const tiers = [
+    { label: 'VIP I', hp: 100, invulnerable: false },
+    { label: 'VIP II', hp: 250, invulnerable: false },
+    { label: 'VIP III', hp: 500, invulnerable: false },
+    { label: 'VIP IV', hp: 1024, invulnerable: false },
+    { label: 'VIP V BẤT TỬ', hp: 1024, invulnerable: true },
+  ];
+  mobs.forEach(mob => {
+    colors.forEach(color => {
+      tiers.forEach(t => {
+        positions.forEach(pos => {
+          behaviors.forEach(behavior => {
+            const name = mob.toUpperCase().replace(/_/g, ' ');
+            const invulnerable = t.invulnerable ? ',Invulnerable:1b' : '';
+            cmds.push(cmd(
+              `${name} ${t.label} · ${color} · ${pos.label} · ${behavior.label}`,
+              `execute at @p run summon minecraft:${mob} ${pos.xyz} {Tags:["cheat_mode"],CustomName:'${jsonName(name + ' ' + t.label, color, { bold: true })}',CustomNameVisible:1b,Health:${t.hp}f,Attributes:[${vipAttrs(t.hp)}],PersistenceRequired:1b,${behavior.nbt}${invulnerable}}`,
+              {
+                type: 'both',
+                desc: `${mob} ${t.label}: ${t.hp} HP; ${pos.label}; ${behavior.label}. Không giả định attack_damage cho mob tầm xa/nổ. Tag cheat_mode giúp xóa nhanh.`,
+                usage: 'Chat: giữ dấu / · Khối lệnh: bỏ dấu / đầu dòng',
+                tags: [mob, 'mega', color, behavior.label, pos.label]
+              }
+            ));
+          });
+        });
+      });
+    });
+  });
+  return cmds;
+}
+
+function genEnchantAll() {
+  const cmds = [];
+  const profiles = [
+    {
+      items: ['wooden_sword','stone_sword','iron_sword','golden_sword','diamond_sword','netherite_sword'],
+      enchants: [['sharpness',5],['smite',5],['bane_of_arthropods',5],['knockback',2],['fire_aspect',2],['looting',3],['sweeping',3],['unbreaking',3],['mending',1]]
+    },
+    {
+      items: ['wooden_axe','stone_axe','iron_axe','golden_axe','diamond_axe','netherite_axe'],
+      enchants: [['sharpness',5],['smite',5],['bane_of_arthropods',5],['efficiency',5],['silk_touch',1],['fortune',3],['unbreaking',3],['mending',1]]
+    },
+    {
+      items: ['wooden_pickaxe','stone_pickaxe','iron_pickaxe','golden_pickaxe','diamond_pickaxe','netherite_pickaxe','wooden_shovel','stone_shovel','iron_shovel','golden_shovel','diamond_shovel','netherite_shovel'],
+      enchants: [['efficiency',5],['silk_touch',1],['fortune',3],['unbreaking',3],['mending',1]]
+    },
+    { items: ['bow'], enchants: [['power',5],['punch',2],['flame',1],['infinity',1],['unbreaking',3],['mending',1]] },
+    { items: ['crossbow'], enchants: [['multishot',1],['quick_charge',3],['piercing',4],['unbreaking',3],['mending',1]] },
+    { items: ['trident'], enchants: [['loyalty',3],['impaling',5],['riptide',3],['channeling',1],['unbreaking',3],['mending',1]] },
+    { items: ['fishing_rod'], enchants: [['luck_of_the_sea',3],['lure',3],['unbreaking',3],['mending',1]] },
+    { items: ['shears','flint_and_steel','shield'], enchants: [['unbreaking',3],['mending',1]] },
+  ];
+  const targets = [
+    { id: '@s', label: 'bản thân' },
+    { id: '@p', label: 'người gần nhất' },
+    { id: '@a', label: 'mọi người' },
+  ];
+  profiles.forEach(profile => {
+    profile.items.forEach(tool => {
+      profile.enchants.forEach(([ench, vanillaMax]) => {
+        const levels = vanillaMax === 1 ? [1] : [...new Set([1, vanillaMax, 10])];
+        levels.forEach(lvl => {
+        targets.forEach(target => {
+          cmds.push(cmd(
+            `${tool} + ${ench} ${lvl} → ${target.label}`,
+            `give ${target.id} minecraft:${tool}{Enchantments:[{id:"minecraft:${ench}",lvl:${lvl}s}],Unbreakable:1b} 1`,
+            {
+              type: 'chat',
+              desc: `${ench} tương thích với ${tool}. Mức vanilla tối đa là ${vanillaMax}; cấp 10 là biến thể cheat.`,
+              usage: 'Java 1.20.1 — không sinh tổ hợp enchant sai loại',
+              tags: [tool, ench, target.label, lvl > vanillaMax ? 'overpowered' : 'vanilla']
+            }
+          ));
+        });
+      });
+    });
+    });
+  });
+  return cmds;
+}
+
+function genFillMega() {
+  const cmds = [];
+  const mats = [
+    'cobblestone','stone','stone_bricks','deepslate_bricks','bricks','sandstone',
+    'quartz_block','prismarine','obsidian','iron_block','gold_block','diamond_block',
+    'oak_planks','spruce_planks','birch_planks','dark_oak_planks',
+    'white_concrete','red_concrete','blue_concrete','green_concrete',
+    'glass','glowstone','sea_lantern','end_stone_bricks','purpur_block',
+    'nether_bricks','red_nether_bricks','blackstone','basalt','copper_block',
+  ];
+  const patterns = ['hollow','outline','replace','destroy'];
+  const sizes = [3, 5, 7, 10, 15, 20, 25, 30, 40, 50];
+  const heightRatios = [
+    { label: 'thấp', ratio: .2 },
+    { label: 'nửa', ratio: .5 },
+    { label: 'vuông', ratio: 1 },
+    { label: 'tháp x2', ratio: 2 },
+    { label: 'tháp x3', ratio: 3 },
+    { label: 'siêu tháp x5', ratio: 5 },
+  ];
+  mats.forEach(mat => {
+    sizes.forEach(s => {
+      heightRatios.forEach(height => {
+        patterns.forEach(pat => {
+          const h = Math.max(1, Math.floor(s * height.ratio));
+          const volume = s * h * s;
+          if (volume > 32768) return;
+          cmds.push(cmd(
+            `Fill ${mat} ${s}×${h}×${s} · ${height.label} · ${pat}`,
+            `fill ~ ~ ~ ~${s - 1} ~${h - 1} ~${s - 1} minecraft:${mat} ${pat}`,
+            {
+              type: 'both',
+              desc: `Công trình ${mat}, rộng ${s}, cao ${h}, chế độ ${pat}.`,
+              usage: `Đã kiểm tra ${volume.toLocaleString('vi-VN')} block — không vượt giới hạn 32.768`,
+              tags: ['fill', mat, pat, height.label]
+            }
+          ));
+        });
+      });
+      cmds.push(cmd(`Sàn ${mat} ${s}×${s}`, `fill ~ ~-1 ~ ~${s - 1} ~-1 ~${s - 1} minecraft:${mat}`, { type: 'both', tags: ['fill'] }));
+      cmds.push(cmd(`Trần ${mat} ${s}×${s}`, `fill ~ ~${s - 1} ~ ~${s - 1} ~${s - 1} ~${s - 1} minecraft:${mat}`, { type: 'both', tags: ['fill'] }));
+    });
+  });
+  return cmds;
+}
+
+function genDataModify() {
+  const cmds = [];
+  cmds.push(cmd('Guard gán Owner', `execute as @e[type=guardvillagers:guard] at @s run data modify entity @s Owner set from entity @p UUID`, { type: 'chat', desc: 'Sao chép UUID đúng kiểu int-array từ người chơi gần mỗi guard.', version: 'Mod Guard Villagers 1.20.1' }));
+  cmds.push(cmd('Guard follow ON', `execute as @e[type=guardvillagers:guard] run data merge entity @s {Following:1b}`, { type: 'chat', desc: 'Có thể cần Hero of the Village tùy followHero config.', version: 'Mod Guard Villagers 1.20.1' }));
+  cmds.push(cmd('Guard follow OFF', `execute as @e[type=guardvillagers:guard] run data merge entity @s {Following:0b}`, { type: 'chat', version: 'Mod' }));
+  cmds.push(cmd('Sói Owner từ player', `execute as @e[type=minecraft:wolf,distance=..10] at @s run data modify entity @s Owner set from entity @p UUID`, { type: 'chat', desc: 'Mỗi sói lấy người chơi gần chính nó nhất.' }));
+  cmds.push(cmd('Sói ngồi', `execute as @e[type=wolf,distance=..20] run data modify entity @s Sitting set value 1b`, { type: 'chat' }));
+  cmds.push(cmd('Sói đứng', `execute as @e[type=wolf,distance=..20] run data modify entity @s Sitting set value 0b`, { type: 'chat' }));
+  cmds.push(cmd('Mob Invulnerable ON', `execute as @e[type=zombie,distance=..30] run data merge entity @s {Invulnerable:1b}`, { type: 'chat' }));
+  cmds.push(cmd('Mob Invulnerable OFF', `execute as @e[type=zombie,distance=..30] run data merge entity @s {Invulnerable:0b}`, { type: 'chat' }));
+  cmds.push(cmd('Đổi tên entity gần', `execute as @e[type=zombie,distance=..5,limit=1] run data merge entity @s {CustomName:'${jsonName('TÊN MỚI','red')}',CustomNameVisible:1b}`, { type: 'chat' }));
+  return cmds;
+}
+
+// ============================================================
+//  RENDER ENGINE
+// ============================================================
+
+let ALL_COMMANDS = [];
+let REJECTED_COMMANDS = [];
+let filteredCommands = [];
+const PAGE_SIZE = 24;
+const SEARCH_PREVIEW_SIZE = 8;
+const renderState = {};
+let activeSection = 'huong-dan';
+let activeType = 'all';
+let currentQuery = '';
+
+function buildAllCommands() {
+  const result = [];
+  REJECTED_COMMANDS = [];
+  SECTIONS.forEach(sec => {
+    const cmds = sec.gen();
+    cmds.forEach(c => {
+      c.sectionId = sec.id;
+      c.sectionTitle = sec.title;
+      const issues = auditCommand(c);
+      if (issues.length) {
+        REJECTED_COMMANDS.push({ command: c, issues });
+      } else {
+        result.push(c);
+      }
+    });
+  });
+  return result;
+}
+
+function auditCommand(entry) {
+  if (entry.kind === 'key') return [];
+  const command = entry.command;
+  const issues = [];
+  const forbidden1201 = /\bminecraft:(mace|bogged|breeze|trial_spawner|vault|crafter)\b/;
+  if (forbidden1201.test(command)) issues.push('ID chỉ có ở phiên bản sau 1.20.1');
+  if (/generic\.scale|sweeping_edge/.test(command)) issues.push('attribute/enchantment không tồn tại trong 1.20.1');
+  if (/Owner:"[0-9a-f-]+"/i.test(command)) issues.push('Owner UUID sai kiểu; cần int-array UUID');
+  if (/tacz:awp\b/.test(command)) issues.push('GunId AWP sai; default pack dùng tacz:ai_awp');
+  if (/^\/—|item modify entity \S+ \S+\s*$/.test(command)) issues.push('không phải lệnh hoàn chỉnh');
+  if (['block', 'both'].includes(entry.type) && /execute at @s\b/.test(command)) {
+    issues.push('@s không phải entity khi chạy từ command block');
+  }
+  const healthMatch = command.match(/generic\.max_health",Base:(\d+(?:\.\d+)?)/);
+  if (healthMatch && Number(healthMatch[1]) > 1024) issues.push('max_health vượt giới hạn 1024');
+  return issues;
+}
+
+function renderTOC() {
+  const toc = document.getElementById('toc');
+  const groups = new Map();
+  SECTIONS.forEach(section => {
+    if (!groups.has(section.group)) groups.set(section.group, []);
+    groups.get(section.group).push(section);
+  });
+  toc.innerHTML = [...groups.entries()].map(([group, sections]) => `
+    <div class="toc-group">
+      <h3>${group}</h3>
+      ${sections.map(section => {
+        const count = ALL_COMMANDS.filter(c => c.sectionId === section.id).length;
+        return `<a class="toc-link" data-section="${section.id}">${section.title} <span style="opacity:.5">(${count.toLocaleString('vi-VN')})</span></a>`;
+      }).join('')}
+    </div>
+  `).join('');
+
+  toc.querySelectorAll('.toc-link').forEach(link => {
+    link.addEventListener('click', () => {
+      selectSection(link.dataset.section);
+    });
+  });
+  const initialLink = toc.querySelector(`[data-section="${activeSection}"]`);
+  if (initialLink) initialLink.classList.add('active');
+}
+
+function selectSection(sectionId) {
+  activeSection = sectionId;
+  activeType = 'all';
+  currentQuery = '';
+  document.getElementById('search').value = '';
+  document.querySelectorAll('.filter-btn').forEach(button => {
+    button.classList.toggle('active', button.dataset.filter === 'all');
+  });
+  document.querySelectorAll('.toc-link').forEach(link => {
+    link.classList.toggle('active', link.dataset.section === sectionId);
+  });
+  refreshView();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function typeTag(type) {
+  if (type === 'chat') return '<span class="tag tag-chat">Chat</span>';
+  if (type === 'block') return '<span class="tag tag-block">Khối lệnh</span>';
+  if (type === 'key') return '<span class="tag tag-chat">Phím</span>';
+  return '<span class="tag tag-both">Chat + Block</span>';
+}
+
+function renderKeyCombo(combo) {
+  return combo.split(' + ').map((part, index) =>
+    `${index ? '<span class="key-plus">+</span>' : ''}<kbd>${escapeHtml(part)}</kbd>`
+  ).join('');
+}
+
+function renderCmdCard(c) {
+  if (c.kind === 'key') {
+    return `<div class="key-card" data-type="key" data-tags="${escapeHtml(c.tags.join(' ').toLowerCase())}">
+      <div class="key-combo">${renderKeyCombo(c.command)}</div>
+      <div class="key-info">
+        <strong>${escapeHtml(c.title)}</strong>
+        <span>${escapeHtml(c.desc)}</span>
+        <small class="key-group">${escapeHtml(c.keyGroup)}</small>
+      </div>
+    </div>`;
+  }
+  const modTag = c.version && c.version.includes('Mod') ? '<span class="tag tag-mod">Mod</span>' : '';
+  const reviewTag = c.review === 'mod-dependent'
+    ? '<span class="tag tag-mod">Phụ thuộc mod/config</span>'
+    : '<span class="tag tag-reviewed">Đã rà soát 1.20.1</span>';
+  const chatCommand = c.command.startsWith('/') ? c.command : `/${c.command}`;
+  const blockCommand = chatCommand.slice(1);
+  const copyButtons = c.type === 'both'
+    ? `<div class="copy-group">
+        <button class="copy-btn" data-cmd="${encodeURIComponent(chatCommand)}">📋 Chat</button>
+        <button class="copy-btn" data-cmd="${encodeURIComponent(blockCommand)}">🟣 Block</button>
+      </div>`
+    : `<button class="copy-btn" data-cmd="${encodeURIComponent(c.type === 'block' ? blockCommand : chatCommand)}">📋 Copy</button>`;
+  return `<div class="cmd-card" data-type="${c.type}" data-tags="${c.tags.join(' ')} ${c.title.toLowerCase()}">
+    <div class="cmd-head">
+      <div>
+        <div class="cmd-title">${c.title}</div>
+        <div class="cmd-meta">
+          ${typeTag(c.type)}
+          <span class="tag tag-ver">${c.version}</span>
+          ${modTag}
+          ${reviewTag}
+        </div>
+      </div>
+      ${copyButtons}
+    </div>
+    <div class="cmd-body">
+      ${c.desc ? `<div class="cmd-desc">${c.desc}</div>` : ''}
+      ${c.usage ? `<div class="cmd-usage">💡 ${c.usage}</div>` : ''}
+      <div class="cmd-code">${(c.type === 'block' ? blockCommand : chatCommand).replace(/</g,'&lt;')}</div>
+    </div>
+  </div>`;
+}
+
+function renderSections(commands) {
+  const content = document.getElementById('content');
+  if (!commands.length) {
+    content.innerHTML = '<div class="no-result"><h2>Không tìm thấy lệnh</h2><p>Thử từ khóa ngắn hơn như “zombie”, “guard”, “give” hoặc “fill”.</p></div>';
+    return;
+  }
+  const bySection = {};
+  commands.forEach(c => {
+    if (!bySection[c.sectionId]) bySection[c.sectionId] = [];
+    bySection[c.sectionId].push(c);
+  });
+
+  content.innerHTML = SECTIONS.map(sec => {
+    const cmds = bySection[sec.id] || [];
+    if (!cmds.length) return '';
+    const initialLimit = currentQuery ? SEARCH_PREVIEW_SIZE : PAGE_SIZE;
+    renderState[sec.id] = { shown: initialLimit, total: cmds.length };
+    const initial = cmds.slice(0, initialLimit);
+    const guide = sec.id === 'huong-dan' ? `
+      <div class="guide-card">
+        <h4>🚀 Quy trình Cheat Mode chuẩn</h4>
+        <ul>
+          <li><b>1.</b> Bật Allow Cheats hoặc Open to LAN → Allow Cheats: ON.</li>
+          <li><b>2.</b> Chạy <code>/gamerule keepInventory true</code> và lấy khối lệnh.</li>
+          <li><b>3.</b> Thử lệnh một lần trong chat trước khi đưa vào Repeat.</li>
+          <li><b>4.</b> Gắn tag riêng cho quân/quái để có thể xóa chính xác.</li>
+          <li><b>5.</b> Tạo bản sao world trước khi dùng fill, kill diện rộng hoặc spawn hàng loạt.</li>
+        </ul>
+      </div>
+      <div class="guide-card">
+        <h4>⌨️ Chat và khối lệnh</h4>
+        <ul>
+          <li><b>Chat:</b> Mở bằng T, giữ dấu <code>/</code>, dán rồi Enter — cần cheat/op.</li>
+          <li><b>Khối lệnh:</b> <code>/give @s command_block</code> → đặt → mở → dán lệnh và bỏ dấu <code>/</code>.</li>
+          <li><b>Repeat tím:</b> Repeat + Need Redstone → gắn Lever → chỉ gạt 1–2 giây.</li>
+          <li><b>@p</b> = người chơi gần nhất · <b>@s</b> = vị trí khối lệnh/entity · <b>~</b> = tọa độ tương đối.</li>
+        </ul>
+      </div>
+      <div class="guide-card">
+        <h4>🧯 Phục hồi khi lag</h4>
+        <ul>
+          <li>Tắt cần gạt Repeat trước, sau đó dùng <code>/kill @e[tag=cheat_mode]</code>.</li>
+          <li>Dọn rác bằng <code>/kill @e[type=item]</code> và tên/mũi tên bằng selector đúng loại.</li>
+          <li>Không dùng <code>/kill @e[type=!player]</code> nếu muốn giữ thú nuôi, giáp đứng, thuyền và NPC.</li>
+          <li><b>Java 1.20.1:</b> item NBT dùng <code>Count</code>/<code>tag</code>. Không trộn cú pháp <code>components</code> của 1.20.5+.</li>
+        </ul>
+      </div>` : '';
+    const keyGuide = sec.id === 'phim-chuc-nang' ? `
+      <div class="guide-card">
+        <h4>⌨️ Trước khi dùng phím tắt</h4>
+        <p>Đây là bind mặc định của Minecraft Java 1.20.1. Laptop có thể cần giữ <b>Fn</b> cùng F1–F12.
+        Modpack có thể đổi hoặc làm trùng phím; kiểm tra tại <b>Esc → Options → Controls → Key Binds</b>.
+        Các phím hiển thị màu đỏ trong màn hình Controls đang bị xung đột.</p>
+      </div>` : '';
+
+    return `<section class="section" id="${sec.id}">
+      <div class="section-header">
+        <h2>${sec.title}</h2>
+        <span class="badge">${cmds.length} lệnh</span>
+      </div>
+      ${guide}${keyGuide}
+      <div class="cmd-list ${sec.id === 'phim-chuc-nang' ? 'key-grid' : ''}" id="list-${sec.id}">
+        ${initial.map(renderCmdCard).join('')}
+      </div>
+      ${cmds.length > initialLimit ? `<button class="load-more" data-section="${sec.id}">Xem thêm ${Math.min(PAGE_SIZE, cmds.length - initialLimit)} / ${cmds.length - initialLimit} lệnh còn lại ↓</button>` : ''}
+    </section>`;
+  }).join('');
+
+  // Store full lists for load more
+  SECTIONS.forEach(sec => {
+    window['_cmds_' + sec.id] = bySection[sec.id] || [];
+  });
+
+  bindEvents();
+}
+
+function bindEvents() {
+  const content = document.getElementById('content');
+  content.onclick = event => {
+    const btn = event.target.closest('.copy-btn');
+    if (btn) {
+      const text = decodeURIComponent(btn.dataset.cmd);
+      const originalLabel = btn.textContent;
+      copyText(text).then(() => {
+        btn.textContent = '✅ Đã copy!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = originalLabel; btn.classList.remove('copied'); }, 2000);
+      });
+      return;
+    }
+    const loadButton = event.target.closest('.load-more');
+    if (loadButton) {
+      const btn = loadButton;
+      const sid = btn.dataset.section;
+      const all = window['_cmds_' + sid] || [];
+      const list = document.getElementById('list-' + sid);
+      const current = list.querySelectorAll('.cmd-card').length;
+      const next = all.slice(current, current + PAGE_SIZE);
+      next.forEach(c => {
+        list.insertAdjacentHTML('beforeend', renderCmdCard(c));
+      });
+      const remaining = all.length - list.querySelectorAll('.cmd-card').length;
+      if (remaining <= 0) btn.remove();
+      else btn.textContent = `Xem thêm ${Math.min(PAGE_SIZE, remaining)} / ${remaining} lệnh còn lại ↓`;
+      updateShownCount();
+    }
+  };
+}
+
+function filterCommands(query, typeFilter) {
+  query = query.toLowerCase().trim();
+  return ALL_COMMANDS.filter(c => {
+    const isChatOrBlockMatch = c.type === 'both' && ['chat', 'block'].includes(typeFilter);
+    const matchType = typeFilter === 'all'
+      || c.type === typeFilter
+      || isChatOrBlockMatch
+      || (typeFilter === 'mod' && ((c.version || '').includes('Mod') || c.tags.includes('mod')));
+    const haystack = (c.title + ' ' + c.command + ' ' + c.desc + ' ' + c.tags.join(' ')).toLowerCase();
+    const matchQuery = !query || haystack.includes(query);
+    return matchType && matchQuery;
+  });
+}
+
+function updateShownCount() {
+  const shown = document.querySelectorAll('.cmd-card').length;
+  document.getElementById('shown-count').textContent = shown.toLocaleString();
+}
+
+function init() {
+  ALL_COMMANDS = buildAllCommands();
+  document.getElementById('total-count').textContent = ALL_COMMANDS.length.toLocaleString();
+  document.getElementById('rejected-count').textContent = REJECTED_COMMANDS.length.toLocaleString('vi-VN');
+  document.getElementById('section-count').textContent = SECTIONS.length.toLocaleString();
+  renderTOC();
+  refreshView();
+
+  let debounce;
+  document.getElementById('search').addEventListener('input', e => {
+    clearTimeout(debounce);
+    debounce = setTimeout(() => {
+      currentQuery = e.target.value.trim();
+      refreshView();
+    }, 200);
+  });
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeType = btn.dataset.filter;
+      refreshView();
+    });
+  });
+
+  document.querySelectorAll('.hero-action[data-section]').forEach(button => {
+    button.addEventListener('click', () => selectSection(button.dataset.section));
+  });
+
+  setupUuidConfig();
+}
+
+function setupUuidConfig() {
+  const input = document.getElementById('uuid-input');
+  const status = document.getElementById('uuid-status');
+  const saveButton = document.getElementById('save-uuid');
+  const copyButton = document.getElementById('copy-uuid-command');
+  input.value = USER_UUID;
+  status.textContent = `Đang dùng: ${USER_UUID}`;
+
+  copyButton.addEventListener('click', async () => {
+    await copyText('/data get entity @s UUID');
+    status.className = 'uuid-status success';
+    status.textContent = 'Đã copy lệnh. Dán vào chat Minecraft rồi copy kết quả về đây.';
+  });
+
+  const saveUuid = () => {
+    const normalized = normalizeUuid(input.value);
+    if (!normalized) {
+      status.className = 'uuid-status error';
+      status.textContent = 'UUID không hợp lệ. Dán UUID chuẩn hoặc kết quả dạng [I; số, số, số, số].';
+      return;
+    }
+
+    USER_UUID = normalized;
+    input.value = normalized;
+    let persisted = true;
+    try {
+      localStorage.setItem(UUID_STORAGE_KEY, normalized);
+    } catch {
+      persisted = false;
+    }
+
+    ALL_COMMANDS = buildAllCommands();
+    document.getElementById('total-count').textContent = ALL_COMMANDS.length.toLocaleString('vi-VN');
+    document.getElementById('rejected-count').textContent = REJECTED_COMMANDS.length.toLocaleString('vi-VN');
+    renderTOC();
+    refreshView();
+    status.className = persisted ? 'uuid-status success' : 'uuid-status error';
+    status.textContent = persisted
+      ? `Đã lưu và đồng bộ Owner: ${normalized}`
+      : `Đã đồng bộ tạm thời nhưng trình duyệt không cho phép lưu cấu hình.`;
+  };
+
+  saveButton.addEventListener('click', saveUuid);
+  input.addEventListener('keydown', event => {
+    if (event.key === 'Enter') saveUuid();
+  });
+}
+
+function refreshView() {
+  filteredCommands = filterCommands(currentQuery, activeType);
+  if (!currentQuery && !['mod', 'key'].includes(activeType)) {
+    filteredCommands = filteredCommands.filter(command => command.sectionId === activeSection);
+  }
+  renderSections(filteredCommands);
+  document.getElementById('shown-count').textContent = filteredCommands.length.toLocaleString();
+  const hint = document.getElementById('library-hint');
+  if (currentQuery) {
+    hint.innerHTML = `Kết quả toàn thư viện cho <b>“${escapeHtml(currentQuery)}”</b>: ${filteredCommands.length.toLocaleString('vi-VN')} lệnh. Mỗi mục hiện trước ${SEARCH_PREVIEW_SIZE} lệnh để trang gọn hơn.`;
+  } else if (activeType === 'mod') {
+    hint.innerHTML = `<b>Lệnh mod</b> · ${filteredCommands.length.toLocaleString('vi-VN')} lệnh từ Guard Villagers và TaCZ.`;
+  } else if (activeType === 'key') {
+    hint.innerHTML = `<b>Phím & chức năng</b> · ${filteredCommands.length.toLocaleString('vi-VN')} phím tắt Minecraft, Creative, F3 và mod.`;
+  } else {
+    const section = SECTIONS.find(item => item.id === activeSection);
+    hint.innerHTML = `<b>${section ? section.title : 'Danh mục'}</b> · ${filteredCommands.length.toLocaleString('vi-VN')} lệnh. Chọn mục khác bên trái hoặc nhập từ khóa để tìm toàn thư viện.`;
+  }
+}
+
+function escapeHtml(value) {
+  return value.replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+  })[char]);
+}
+
+init();
+</script>
+</body>
+</html>
