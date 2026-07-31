@@ -78,6 +78,8 @@
       }
       .hero-actions { display: none; }
       .main { padding: .85rem; }
+      .key-grid { grid-template-columns: 1fr; }
+      .key-card { grid-template-columns: 100px 1fr; }
     }
     .sidebar {
       background: var(--panel);
@@ -109,6 +111,33 @@
     }
     .filter-btn.active, .filter-btn:hover {
       border-color: var(--gold); color: var(--gold);
+    }
+    .key-grid {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem;
+    }
+    .key-card {
+      display: grid; grid-template-columns: minmax(110px, auto) 1fr; gap: .8rem;
+      align-items: center; padding: .75rem; background: var(--panel);
+      border: 1px solid var(--border); border-radius: 8px;
+    }
+    .key-card:hover { border-color: var(--gold-dim); }
+    .key-combo { display: flex; flex-wrap: wrap; gap: .3rem; align-items: center; }
+    kbd {
+      display: inline-block; min-width: 30px; padding: .25rem .45rem;
+      border: 1px solid #4a4a67; border-bottom-width: 3px; border-radius: 5px;
+      background: #202033; color: #fff; text-align: center;
+      font: 700 .75rem 'Segoe UI', sans-serif; white-space: nowrap;
+    }
+    .key-plus { color: var(--muted); font-size: .7rem; }
+    .key-info strong { display: block; font-size: .86rem; margin-bottom: .15rem; }
+    .key-info span { display: block; color: var(--muted); font-size: .76rem; }
+    .key-group {
+      display: inline-block; color: var(--cyan); font-size: .65rem;
+      text-transform: uppercase; letter-spacing: .06em; margin-top: .25rem;
+    }
+    @media (max-width: 900px) {
+      .key-grid { grid-template-columns: 1fr; }
+      .key-card { grid-template-columns: 100px 1fr; }
     }
     .toc-group { margin-bottom: .8rem; }
     .toc-group h3 {
@@ -251,6 +280,7 @@
   </div>
   <div class="hero-actions">
     <button class="hero-action" data-section="huong-dan">🚀 Bắt đầu</button>
+    <button class="hero-action" data-section="phim-chuc-nang">⌨️ Phím</button>
     <button class="hero-action" data-section="give-vu-khi">⚔️ Trang bị</button>
     <button class="hero-action" data-section="summon-quai">🧟 Triệu hồi</button>
     <button class="hero-action" data-section="xay-dung">🏗️ Xây dựng</button>
@@ -269,6 +299,7 @@
       <button class="filter-btn active" data-filter="all">Tất cả</button>
       <button class="filter-btn" data-filter="chat">Chat</button>
       <button class="filter-btn" data-filter="block">Khối lệnh</button>
+      <button class="filter-btn" data-filter="key">Phím</button>
       <button class="filter-btn" data-filter="mod">Mod</button>
     </div>
     <nav id="toc"></nav>
@@ -293,6 +324,7 @@ const USER_UUID = '6fac357c-1d75-3c23-ace8-9f68a0da7efb';
 
 const SECTIONS = [
   { group: '01 · Bắt đầu', id: 'huong-dan', title: '📖 Hướng Dẫn Cơ Bản', gen: genGuide },
+  { group: '01 · Bắt đầu', id: 'phim-chuc-nang', title: '⌨️ Phím & Chức Năng', gen: genKeys },
   { group: '01 · Bắt đầu', id: 'command-block', title: '🟣 Khối Lệnh & Công Cụ', gen: genCommandBlock },
   { group: '01 · Bắt đầu', id: 'gamemode', title: '🎮 Gamemode & Luật Chơi', gen: genGamemode },
   { group: '02 · Người chơi', id: 'give-do', title: '🎁 Đồ Hữu Ích', gen: genItems },
@@ -332,6 +364,20 @@ function cmd(title, command, opts = {}) {
   };
 }
 
+function key(title, combo, desc, group = 'Minecraft', tags = []) {
+  return {
+    title,
+    command: combo,
+    desc,
+    usage: 'Có thể đổi tại Options → Controls → Key Binds',
+    type: 'key',
+    version: 'Java 1.20.1',
+    tags: [group, ...tags],
+    kind: 'key',
+    keyGroup: group,
+  };
+}
+
 function jsonName(text, color = 'gold', extra = {}) {
   return JSON.stringify({ text, color, bold: true, ...extra });
 }
@@ -363,6 +409,106 @@ function netherArmor120() {
 }
 
 // ---- GENERATORS ----
+
+function genKeys() {
+  const keys = [];
+
+  [
+    ['Đi tới', 'W', 'Di chuyển nhân vật về phía trước.'],
+    ['Đi lùi', 'S', 'Di chuyển nhân vật về phía sau.'],
+    ['Đi sang trái', 'A', 'Di chuyển ngang sang trái.'],
+    ['Đi sang phải', 'D', 'Di chuyển ngang sang phải.'],
+    ['Nhảy', 'Space', 'Nhảy; khi bơi sẽ nổi lên.'],
+    ['Chạy nhanh', 'Ctrl', 'Giữ trong khi di chuyển để sprint.'],
+    ['Chạy nhanh bằng W', 'W + W', 'Nhấn W hai lần nhanh để sprint.'],
+    ['Cúi / đi chậm', 'Shift', 'Sneak, hạn chế rơi khỏi mép block.'],
+    ['Tấn công / đào', 'Chuột trái', 'Đánh entity hoặc giữ để phá block.'],
+    ['Dùng / đặt block', 'Chuột phải', 'Dùng vật phẩm, mở block hoặc đặt block.'],
+    ['Chọn block', 'Chuột giữa', 'Chọn block đang nhìn nếu có trong túi; Creative sẽ lấy block.'],
+    ['Đổi ô hotbar', 'Con lăn chuột', 'Cuộn qua các ô 1–9.'],
+    ['Chọn ô nhanh', '1–9', 'Chọn trực tiếp một ô trên hotbar.'],
+    ['Mở túi đồ', 'E', 'Mở inventory và màn hình chế tạo cá nhân.'],
+    ['Vứt một vật phẩm', 'Q', 'Vứt một món từ stack đang cầm.'],
+    ['Vứt cả stack', 'Ctrl + Q', 'Vứt toàn bộ stack đang cầm.'],
+    ['Đổi hai tay', 'F', 'Đổi vật phẩm tay chính và tay phụ.'],
+    ['Danh sách người chơi', 'Tab', 'Hiện danh sách người chơi trên server.'],
+    ['Mở chat', 'T', 'Mở ô chat thông thường.'],
+    ['Mở dòng lệnh', '/', 'Mở chat với dấu / sẵn.'],
+    ['Tạm dừng / menu', 'Esc', 'Mở menu; singleplayer sẽ tạm dừng nếu cho phép.'],
+    ['Tiến trình', 'L', 'Mở màn hình Advancements.'],
+  ].forEach(([title, combo, desc]) => keys.push(key(title, combo, desc, 'Điều khiển cơ bản')));
+
+  [
+    ['Di chuyển nhanh stack', 'Shift + Chuột trái', 'Chuyển cả stack giữa inventory và rương/máy.'],
+    ['Chia đôi stack', 'Chuột phải', 'Nhấc một nửa stack hoặc đặt từng món.'],
+    ['Gom vật phẩm cùng loại', 'Chuột trái + Chuột trái', 'Nhấp đúp một item để gom các item cùng loại.'],
+    ['Đưa item vào hotbar', '1–9', 'Khi trỏ vào item, nhấn số để đổi với ô hotbar tương ứng.'],
+    ['Chia đều nhiều ô', 'Kéo chuột trái', 'Giữ chuột trái và kéo qua nhiều slot để chia đều.'],
+    ['Đặt mỗi ô một món', 'Kéo chuột phải', 'Giữ chuột phải và kéo để đặt một item mỗi slot.'],
+    ['Lấy cả stack Creative', 'Chuột giữa', 'Trong Creative inventory, lấy stack tối đa của item.'],
+    ['Xóa item Creative', 'Thả vào ô X', 'Kéo item vào ô dấu X trong Creative inventory.'],
+    ['Tìm item', 'E + tab Tìm kiếm', 'Mở Creative inventory và chọn tab kính lúp.'],
+  ].forEach(([title, combo, desc]) => keys.push(key(title, combo, desc, 'Kho đồ')));
+
+  [
+    ['Bay Creative', 'Space + Space', 'Nhấn Space hai lần để bật hoặc tắt bay.'],
+    ['Bay lên', 'Space', 'Giữ Space khi đang bay.'],
+    ['Bay xuống', 'Shift', 'Giữ Shift khi đang bay.'],
+    ['Bay nhanh', 'Ctrl + W', 'Sprint trong khi bay để tăng tốc.'],
+    ['Sao chép block có NBT', 'Ctrl + Chuột giữa', 'Creative: lấy block kèm dữ liệu như command block, rương hoặc bảng.'],
+    ['Lưu hotbar số 1–9', 'C + 1–9', 'Creative: lưu toàn bộ hotbar vào một preset.'],
+    ['Nạp hotbar số 1–9', 'X + 1–9', 'Creative: khôi phục preset hotbar đã lưu.'],
+    ['Thanh công cụ Creative', 'E', 'Mở kho item Creative và ô tìm kiếm.'],
+  ].forEach(([title, combo, desc]) => keys.push(key(title, combo, desc, 'Creative Mode')));
+
+  [
+    ['Ẩn giao diện', 'F1', 'Ẩn HUD và tay để chụp ảnh sạch.'],
+    ['Chụp màn hình', 'F2', 'Lưu ảnh vào thư mục screenshots.'],
+    ['Màn hình debug', 'F3', 'Hiện tọa độ, FPS, biome, hướng nhìn và thông tin hệ thống.'],
+    ['Đổi góc nhìn', 'F5', 'Đổi giữa góc nhìn thứ nhất, thứ ba sau và thứ ba trước.'],
+    ['Toàn màn hình', 'F11', 'Bật hoặc tắt fullscreen.'],
+    ['Tải lại chunk', 'F3 + A', 'Reload toàn bộ chunk đang hiển thị.'],
+    ['Hiện hitbox', 'F3 + B', 'Bật/tắt hộp va chạm và hướng nhìn entity.'],
+    ['Copy tọa độ thành lệnh TP', 'F3 + C', 'Copy vị trí và góc nhìn thành lệnh /tp. Không giữ 10 giây vì sẽ kích hoạt debug crash.'],
+    ['Xóa lịch sử chat', 'F3 + D', 'Xóa các dòng chat đang hiển thị.'],
+    ['Tăng render distance', 'F3 + F', 'Tăng khoảng cách render theo từng mức.'],
+    ['Giảm render distance', 'F3 + Shift + F', 'Giảm khoảng cách render theo từng mức.'],
+    ['Hiện đường biên chunk', 'F3 + G', 'Bật/tắt lưới chunk — hữu ích khi xây farm.'],
+    ['Advanced Tooltips', 'F3 + H', 'Hiện ID item, độ bền và NBT cơ bản; dùng để tìm ID đồ mod.'],
+    ['Copy dữ liệu block/entity', 'F3 + I', 'Copy dữ liệu server-side của block hoặc entity đang nhìn.'],
+    ['Bắt đầu profiling', 'F3 + L', 'Ghi lại performance profiling trong khoảng 10 giây.'],
+    ['Đổi Creative/Spectator', 'F3 + N', 'Chuyển giữa Spectator và gamemode trước đó nếu có quyền.'],
+    ['Pause khi mất focus', 'F3 + P', 'Bật/tắt tự tạm dừng khi chuyển sang cửa sổ khác.'],
+    ['Danh sách phím F3', 'F3 + Q', 'Hiện trợ giúp toàn bộ debug shortcut trong chat.'],
+    ['Reload resource pack', 'F3 + T', 'Tải lại texture, model, âm thanh và resource packs.'],
+    ['Game Mode Switcher', 'F3 + F4', 'Giữ F3 rồi nhấn F4 để chọn gamemode nếu có quyền.'],
+    ['Biểu đồ profiler', 'Shift + F3', 'Mở màn hình debug kèm biểu đồ profiler.'],
+    ['Tạm dừng không mở menu', 'F3 + Esc', 'Tạm dừng singleplayer mà không mở menu tùy chọn.'],
+  ].forEach(([title, combo, desc]) => keys.push(key(title, combo, desc, 'Debug F3')));
+
+  [
+    ['Gợi ý lệnh / ID', 'Tab', 'Tự hoàn thành lệnh, selector, tên người chơi và ID item.'],
+    ['Lệnh trước / sau', '↑ / ↓', 'Duyệt lịch sử lệnh đã nhập trong chat.'],
+    ['Copy văn bản', 'Ctrl + C', 'Copy phần chữ đang chọn. F3+C là tổ hợp khác.'],
+    ['Dán lệnh', 'Ctrl + V', 'Dán lệnh vào chat hoặc command block.'],
+    ['Chọn toàn bộ', 'Ctrl + A', 'Chọn toàn bộ nội dung ô lệnh.'],
+    ['Xóa nhanh một từ', 'Ctrl + Backspace', 'Xóa cả từ phía trước con trỏ.'],
+    ['Chạy lệnh chat', 'Enter', 'Gửi tin nhắn hoặc thực thi lệnh.'],
+  ].forEach(([title, combo, desc]) => keys.push(key(title, combo, desc, 'Chat & Command')));
+
+  [
+    ['Bắn súng TaCZ', 'Chuột trái', 'Bắn vũ khí đang cầm.'],
+    ['Ngắm TaCZ', 'Chuột phải', 'Ngắm qua tâm ruồi hoặc ống ngắm.'],
+    ['Nạp đạn TaCZ', 'R', 'Reload súng từ đạn phù hợp trong inventory.'],
+    ['Kiểm tra toàn bộ phím TaCZ', 'Esc → Options → Controls', 'Tìm “TaCZ” trong Key Binds; phím đổi chế độ bắn/phụ kiện có thể khác theo modpack.'],
+    ['Mở GUI Guard', 'Chuột phải', 'Tương tác với guard để xem trang bị hoặc điều khiển khi mod cho phép.'],
+    ['Tạo Guard từ dân làng', 'Shift + Chuột phải', 'Cầm kiếm hoặc nỏ rồi crouch-right-click dân làng thất nghiệp/nitwit, tùy cấu hình mod.'],
+    ['Cho Guard đi theo', 'Nút Follow trong GUI', 'Mở GUI guard và bật Follow; lệnh Owner/Following trong cẩm nang làm tương tự hàng loạt.'],
+    ['Kiểm tra phím mod bị trùng', 'Esc → Options → Controls', 'Các phím màu đỏ đang xung đột; đổi một trong hai bind.'],
+  ].forEach(([title, combo, desc]) => keys.push(key(title, combo, desc, 'Mod TaCZ & Guard', ['mod'])));
+
+  return keys;
+}
 
 function genGuide() {
   return [
@@ -1112,10 +1258,27 @@ function selectSection(sectionId) {
 function typeTag(type) {
   if (type === 'chat') return '<span class="tag tag-chat">Chat</span>';
   if (type === 'block') return '<span class="tag tag-block">Khối lệnh</span>';
+  if (type === 'key') return '<span class="tag tag-chat">Phím</span>';
   return '<span class="tag tag-both">Chat + Block</span>';
 }
 
+function renderKeyCombo(combo) {
+  return combo.split(' + ').map((part, index) =>
+    `${index ? '<span class="key-plus">+</span>' : ''}<kbd>${escapeHtml(part)}</kbd>`
+  ).join('');
+}
+
 function renderCmdCard(c) {
+  if (c.kind === 'key') {
+    return `<div class="key-card" data-type="key" data-tags="${escapeHtml(c.tags.join(' ').toLowerCase())}">
+      <div class="key-combo">${renderKeyCombo(c.command)}</div>
+      <div class="key-info">
+        <strong>${escapeHtml(c.title)}</strong>
+        <span>${escapeHtml(c.desc)}</span>
+        <small class="key-group">${escapeHtml(c.keyGroup)}</small>
+      </div>
+    </div>`;
+  }
   const modTag = c.version && c.version.includes('Mod') ? '<span class="tag tag-mod">Mod</span>' : '';
   return `<div class="cmd-card" data-type="${c.type}" data-tags="${c.tags.join(' ')} ${c.title.toLowerCase()}">
     <div class="cmd-head">
@@ -1184,14 +1347,21 @@ function renderSections(commands) {
           <li><b>1.20.1:</b> NBT item cũ dùng <code>Count</code>/<code>tag</code>. <b>1.21:</b> item stack dùng <code>count</code>/<code>components</code>.</li>
         </ul>
       </div>` : '';
+    const keyGuide = sec.id === 'phim-chuc-nang' ? `
+      <div class="guide-card">
+        <h4>⌨️ Trước khi dùng phím tắt</h4>
+        <p>Đây là bind mặc định của Minecraft Java 1.20.1. Laptop có thể cần giữ <b>Fn</b> cùng F1–F12.
+        Modpack có thể đổi hoặc làm trùng phím; kiểm tra tại <b>Esc → Options → Controls → Key Binds</b>.
+        Các phím hiển thị màu đỏ trong màn hình Controls đang bị xung đột.</p>
+      </div>` : '';
 
     return `<section class="section" id="${sec.id}">
       <div class="section-header">
         <h2>${sec.title}</h2>
         <span class="badge">${cmds.length} lệnh</span>
       </div>
-      ${guide}
-      <div class="cmd-list" id="list-${sec.id}">
+      ${guide}${keyGuide}
+      <div class="cmd-list ${sec.id === 'phim-chuc-nang' ? 'key-grid' : ''}" id="list-${sec.id}">
         ${initial.map(renderCmdCard).join('')}
       </div>
       ${cmds.length > initialLimit ? `<button class="load-more" data-section="${sec.id}">Xem thêm ${Math.min(PAGE_SIZE, cmds.length - initialLimit)} / ${cmds.length - initialLimit} lệnh còn lại ↓</button>` : ''}
@@ -1241,7 +1411,10 @@ function bindEvents() {
 function filterCommands(query, typeFilter) {
   query = query.toLowerCase().trim();
   return ALL_COMMANDS.filter(c => {
-    const matchType = typeFilter === 'all' || c.type === typeFilter || c.type === 'both' || (typeFilter === 'mod' && (c.version || '').includes('Mod'));
+    const matchType = typeFilter === 'all'
+      || c.type === typeFilter
+      || c.type === 'both'
+      || (typeFilter === 'mod' && ((c.version || '').includes('Mod') || c.tags.includes('mod')));
     const haystack = (c.title + ' ' + c.command + ' ' + c.desc + ' ' + c.tags.join(' ')).toLowerCase();
     const matchQuery = !query || haystack.includes(query);
     return matchType && matchQuery;
@@ -1285,7 +1458,7 @@ function init() {
 
 function refreshView() {
   filteredCommands = filterCommands(currentQuery, activeType);
-  if (!currentQuery && activeType !== 'mod') {
+  if (!currentQuery && !['mod', 'key'].includes(activeType)) {
     filteredCommands = filteredCommands.filter(command => command.sectionId === activeSection);
   }
   renderSections(filteredCommands);
@@ -1295,6 +1468,8 @@ function refreshView() {
     hint.innerHTML = `Kết quả toàn thư viện cho <b>“${escapeHtml(currentQuery)}”</b>: ${filteredCommands.length.toLocaleString('vi-VN')} lệnh. Mỗi mục hiện trước ${SEARCH_PREVIEW_SIZE} lệnh để trang gọn hơn.`;
   } else if (activeType === 'mod') {
     hint.innerHTML = `<b>Lệnh mod</b> · ${filteredCommands.length.toLocaleString('vi-VN')} lệnh từ Guard Villagers và TaCZ.`;
+  } else if (activeType === 'key') {
+    hint.innerHTML = `<b>Phím & chức năng</b> · ${filteredCommands.length.toLocaleString('vi-VN')} phím tắt Minecraft, Creative, F3 và mod.`;
   } else {
     const section = SECTIONS.find(item => item.id === activeSection);
     hint.innerHTML = `<b>${section ? section.title : 'Danh mục'}</b> · ${filteredCommands.length.toLocaleString('vi-VN')} lệnh. Chọn mục khác bên trái hoặc nhập từ khóa để tìm toàn thư viện.`;
